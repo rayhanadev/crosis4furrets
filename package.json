@@ -1,8 +1,8 @@
 {
-	"name": "",
+	"name": "crosis4furrets",
 	"private": "true",
-	"version": "0.0.1",
-	"description": "",
+	"version": "1.0.0",
+	"description": "An abstraction layer on top of @replit/crosis that makes Repl connection management and operations so easy, a Furret could do it!",
 	"sideEffects": false,
 	"type": "module",
 	"main": "./dist/index.cjs",
@@ -32,8 +32,14 @@
 		"type": "",
 		"url": ""
 	},
-	"keywords": [],
-	"author": "name <example@example.com> (https://example.com)",
+	"keywords": [
+		"replit",
+		"replit-api",
+		"crosis",
+		"protocol",
+		"goval"
+	],
+	"author": "Ray Arayilakath <rayhanadev@protonmail.com> (https://www.furret.codes)",
 	"license": "MIT",
 	"bugs": {
 		"url": ""
@@ -51,6 +57,7 @@
 		"@types/inquirer": "^8.2.1",
 		"@types/jest": "^28.1.1",
 		"@types/node": "^18.0.1",
+		"@types/node-fetch": "2.x",
 		"@typescript-eslint/eslint-plugin": "^5.27.1",
 		"@typescript-eslint/parser": "^5.27.1",
 		"babel-jest": "^28.1.1",
@@ -70,7 +77,6 @@
 	"dependencies": {
 		"@replit/crosis": "^9.0.0",
 		"@replit/protocol": "^0.2.49",
-		"@types/node-fetch": "2.x",
 		"gitignore-parser": "^0.0.2",
 		"node-fetch": "2.x"
 	},

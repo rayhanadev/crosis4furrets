@@ -1,12 +1,17 @@
-> This project is a **Work in Progress** and currently in development. The API is
-> subject to change without warning.
+![](https://edge.furret.codes/f/crosis4furrets.png)
 
----
+# Crosis4Furrets
+
+An abstraction layer on top of [@replit/crosis](https://www.npmjs.com/package/@replit/crosis)
+that makes Repl connection management and operations so easy, a Furret could do it! :tada:
 
 ## Install
 
 ```sh
+# with NPM
 $ npm install crosis4furrets
+
+# with Yarn
 $ yarn add crosis4furrets
 ```
 
@@ -82,10 +87,22 @@ of these operations will be limited on Repls that you do not own:
 import { Crosis } from "crosis4furrets";
 
 const client = new Crosis({
-  process.env.REPLIT_TOKEN, // connect.sid
-  "68fff490-4ce3-4123-b429-c11622fb8dd3" // id of a repl
+  token: process.env.REPLIT_TOKEN, // connect.sid
+  replId: "68fff490-4ce3-4123-b429-c11622fb8dd3" // id of a repl
 });
 
 await client.connect();
 console.log("Read:\n", await client.read("index.js", "utf-8"));
 ```
+
+Note: If you want an easy way to get ReplID's, visit
+[this Repl](https://ally.furret.codes/replid).
+
+## Contributing
+
+This project is in active development and we would love some :sparkles: fabulous
+:sparkles: contributions! To get started, visit our [Contributing](#) documentation.
+
+## Licensing
+
+This project is licensed under the MIT License. For more information, see [LICENSE](#).
