@@ -43,5 +43,6 @@ module.exports = [
 		input: 'dist/dts/index.d.ts',
 		output: [{ file: 'dist/index.d.ts', format: 'es' }],
 		plugins: [dts(), del({ hook: 'buildEnd', targets: './dist/dts' })],
+		external: [...builtinModules, ...Object.keys(dependencies)],
 	},
 ];

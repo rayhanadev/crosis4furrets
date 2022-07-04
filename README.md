@@ -101,8 +101,9 @@ Note: If you want an easy way to get ReplID's, visit
 ## Contributing
 
 This project is in active development and we would love some :sparkles: fabulous
-:sparkles: contributions! To get started, visit our [Contributing](#) documentation.
+:sparkles: contributions! To get started, visit our [Contributing](https://github.com/rayhanadev/crosis4furrets/blob/main/CONTRIBUTING.md)
+documentation.
 
 ## Licensing
 
-This project is licensed under the MIT License. For more information, see [LICENSE](#).
+This project is licensed under the MIT License. For more information, see [LICENSE](https://github.com/rayhanadev/crosis4furrets/blob/main/LICENSE).

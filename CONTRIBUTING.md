@@ -10,18 +10,18 @@ a change.
 
 Please note the following:
 
--   We have a [Code of Conduct](#), please follow it in all your interactions with the
-		project.
+-   We have a [Code of Conduct](https://github.com/rayhanadev/crosis4furrets/blob/main/CODE_OF_CONDUCT.md),
+    please follow it in all your interactions with the project.
 -   We use `Eslint` and `Prettier` to lint and format our code respectively. We have
-	  included scripts and configuration files to help you maintain similar code:
+    included scripts and configuration files to help you maintain similar code:
     ```sh
     $ yarn lint:fix
     $ yarn format:fix
     ```
     please run these before building.
 -   We use `Rollup` to bundle our ESM code to ESM and CommonJS compatible
-		distributions, as well as generate Typescript types. We have included scripts and
-		configuration files to help you build similar code:
+    distributions, as well as generate Typescript types. We have included scripts and
+    configuration files to help you build similar code:
     ```sh
     $ yarn build
     ```
@@ -33,7 +33,7 @@ Please note the following:
     ```
     please run this before submitting a pull request.
 -   We follow the 'Conventional Commits' commit convention. If your pull request does
-	  not adhere to the convention, it will not be merged.
+    not adhere to the convention, it will not be merged.
 
 ## Pull Request Process
 
@@ -41,11 +41,11 @@ Please note the following:
    submit.
 2. Make sure your pull request uses the most recent version of the code.
 3. Ensure any dependencies match with current dependencies or have essential
-	 dependencies.
+   dependencies.
 4. Update the README.md with changes if necessary. This includes any major changes to
-	 the features, usage of the package, etc.
-6. Increase the version numbers in any examples files and the README.md to the new
-	 version that this Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-8. You may merge the Pull Request in once you have the approval of repository
-	 maintainer or owner, or if you do not have permission to do that, you may request a
-	 reviewer to merge it for you.
+   the features, usage of the package, etc.
+5. Increase the version numbers in any examples files and the README.md to the new
+   version that this Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
+6. You may merge the Pull Request in once you have the approval of repository
+   maintainer or owner, or if you do not have permission to do that, you may request a
+   reviewer to merge it for you.

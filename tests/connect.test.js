@@ -10,7 +10,7 @@ describe('Check Connect method.', () => {
 		test('Connect to a remote Repl.', async () => {
 			expect(await client.connect()).toBe(void 0);
 		});
-	})
+	});
 
 	describe('Check.', () => {
 		test('Check for connected property on <Client>.', async () => {
@@ -24,7 +24,7 @@ describe('Check GraphQL information.', () => {
 		test('Check for user property on <Client>.', async () => {
 			expect(Object.keys(client.user)).toMatchObject(['id', 'username']);
 		});
-		
+
 		test('Check for repl property on <Client>.', async () => {
 			expect(Object.keys(client.repl)).toMatchObject([
 				'id',
@@ -42,7 +42,7 @@ describe('Check Persist method.', () => {
 		test('Persist file changes on a remote Repl.', async () => {
 			expect(await client.persist()).toBe(true);
 		});
-	})
+	});
 
 	describe('Check.', () => {
 		test('Check for connected property on <Client>.', async () => {
@@ -64,4 +64,3 @@ describe('Check Close method.', () => {
 		});
 	});
 });
-

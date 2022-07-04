@@ -137,8 +137,7 @@ export class GraphQL {
 			[index: string]: any;
 		},
 	) {
-		let res: Response;
-		res = await fetch(
+		const res = await fetch(
 			`http://replit.com/graphql?query=${this.queries[query]}${
 				variables ? `&variables=${JSON.stringify(variables)}` : ''
 			}`,

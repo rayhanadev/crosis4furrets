@@ -15,5 +15,7 @@
 		"ecmaVersion": 12,
 		"sourceType": "module"
 	},
-	"rules": {}
+	"rules": {
+		"@typescript-eslint/no-explicit-any": "off"
+	}
 }
