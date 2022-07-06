@@ -49,23 +49,26 @@ interface ConfigFiles {
 
 type ReadEncodingValues = BufferEncoding | undefined;
 
-type ReadEncodingType<T extends ReadEncodingValues> = T extends BufferEncoding
-	? string
-	: T extends undefined
-	? Buffer
-	: never;
+// prettier-ignore
+type ReadEncodingType<T extends ReadEncodingValues> =
+	T extends BufferEncoding
+		? string
+		: T extends undefined
+			? Buffer : never;
 
-type DirectoryContentType<T extends boolean> = T extends true
-	? api.File
-	: T extends false
-	? string
-	: never;
+// prettier-ignore
+type DirectoryContentType<T extends boolean> =
+	T extends true
+		? api.File
+		: T extends false
+			? string : never;
 
-type PackageListContentType<T extends boolean> = T extends true
-	? api.IPackage
-	: T extends false
-	? api.IPackage
-	: never;
+// prettier-ignore
+type PackageListContentType<T extends boolean> =
+	T extends true
+		? api.IPackage
+		: T extends false
+			? string : never;
 
 class CrosisClient {
 	private token: string;
@@ -282,10 +285,9 @@ class CrosisClient {
 	}
 
 	async recursedir(path: string, withIgnore = true): Promise<string[]> {
+		const ignoreFile = await this.configFiles.ignore();
 		const ignore =
-			withIgnore && this.configFiles.ignore
-				? compile(<string>await this.configFiles.ignore())
-				: false;
+			withIgnore && ignoreFile ? compile(<string>ignoreFile) : false;
 
 		const isDir = (file: api.File) => file.type && file.type === 1;
 
@@ -456,9 +458,7 @@ class CrosisClient {
 		if (res.error) throw new Error('CrosisError: ' + res.error);
 		return raw
 			? res.packageListSpecfileResp.pkgs
-			: res.packageListSpecfileResp.pkgs.map(({ ...data }) => {
-					return { ...data };
-			  });
+			: res.packageListSpecfileResp.pkgs.map(({ name }) => name);
 	}
 
 	async packageSearch(query: string): Promise<api.IPackage[] | boolean> {
