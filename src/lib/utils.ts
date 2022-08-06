@@ -22,15 +22,11 @@ export const govalMetadata = async (
 				signal,
 				method: 'POST',
 				headers: {
-					Host: 'replit.com',
-					Origin: 'https://replit.com',
-					Referrer: 'https://replit.com',
+					'User-Agent': 'Mozilla/5.0',
 					'Content-Type': 'application/json',
-					Accept: 'application/json',
-					Connection: 'keep-alive',
-					'User-Agent': 'crosis4furrets',
-					'X-Requested-With': 'crosis4furrets',
-					Cookie: `connect.sid=${options.token}`,
+					'X-Requested-With': 'XMLHttpRequest',
+					Referrer: 'https://replit.com',
+					Cookie: `connect.sid=${options.token};`,
 				},
 				body: JSON.stringify({}),
 			},
@@ -66,7 +62,7 @@ export const govalMetadata = async (
 	};
 };
 
-const CurrentUser = `
+const CURRENT_USER = `
   query CurrentUser {
     currentUser {
       id
@@ -75,7 +71,7 @@ const CurrentUser = `
   }
 `;
 
-const Repl = `
+const REPL = `
   query Repl($id: String!) {
     repl(id: $id) {
       ... on Repl {
@@ -104,50 +100,35 @@ interface GraphQLResponse {
 }
 
 export class GraphQL {
-	private headers: {
-		[index: string]: string;
-	};
-
-	protected queries: {
-		[index: string]: string;
-	};
+	private headers: Record<string, string>;
+	protected queries: Record<string, string>;
 
 	constructor(token: string) {
 		this.headers = {
-			Host: 'replit.com',
-			Origin: 'https://replit.com',
-			Referrer: 'https://replit.com',
+			'User-Agent': 'Mozilla/5.0',
 			'Content-Type': 'application/json',
-			Accept: 'application/json',
-			Connection: 'keep-alive',
-			'User-Agent': 'crosis4furrets',
-			'X-Requested-With': 'crosis4furrets',
-			Cookie: token ? 'connect.sid=' + token : '',
+			'X-Requested-With': 'XMLHttpRequest',
+			Referrer: 'https://replit.com/',
+			Cookie: token ? `connect.sid=${encodeURIComponent(token)};` : '',
 		};
 
 		this.queries = {
-			CurrentUser,
-			Repl,
+			CURRENT_USER,
+			REPL,
 		};
 	}
 
-	async request(
-		query: string,
-		variables?: {
-			[index: string]: any;
-		},
-	) {
-		const res = await fetch(
-			`http://replit.com/graphql?query=${this.queries[query]}${
-				variables ? `&variables=${JSON.stringify(variables)}` : ''
-			}`,
-			{
-				method: 'GET',
-				headers: this.headers,
-			},
-		);
+	async request(query: string, variables?: Record<string, any>) {
+		const res = (await fetch('https://replit.com/graphql', {
+			method: 'POST',
+			headers: this.headers,
+			body: JSON.stringify({
+				query: this.queries[query],
+				variables: JSON.stringify(variables),
+			}),
+		}).then((res) => res.json())) as GraphQLResponse;
 
-		const { data, errors } = (await res.json()) as GraphQLResponse;
+		const { data, errors } = res;
 
 		if (errors) throw new Error('Replit GraphQL Error.');
 		return data;

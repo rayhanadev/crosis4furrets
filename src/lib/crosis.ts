@@ -78,9 +78,7 @@ class CrosisClient {
 	user?: User;
 	repl?: Repl;
 	configFiles: ConfigFiles;
-	protected channels: {
-		[index: string]: Channel;
-	};
+	protected channels: Record<string, Channel>;
 	connected: boolean;
 	persisting: boolean;
 
@@ -124,9 +122,9 @@ class CrosisClient {
 		};
 
 		this.configFiles = {
-			'.replit': () => getReplConfig(),
-			'replit.nix': () => getReplNix(),
-			ignore: () => getReplIgnore(),
+			'.replit': getReplConfig,
+			'replit.nix': getReplNix,
+			ignore: getReplIgnore,
 			env: null,
 		};
 
@@ -167,11 +165,11 @@ class CrosisClient {
 	async connect(): Promise<void> {
 		if (!this.replId)
 			throw new Error(
-				'UserError: No ReplID Found. Either pass a ReplID into the constructor.',
+				'UserError: No ReplID Found. Pass a ReplID into the constructor.',
 			);
 
-		this.user = (await this.gql.request('CurrentUser')).currentUser;
-		this.repl = (await this.gql.request('Repl', { id: this.replId })).repl;
+		this.user = (await this.gql.request('CURRENT_USER')).currentUser;
+		this.repl = (await this.gql.request('REPL', { id: this.replId })).repl;
 
 		await new Promise<void>((res) => {
 			const context = null;
