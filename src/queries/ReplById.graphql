@@ -1,0 +1,20 @@
+query ReplById($id: String!) {
+	repl(id: $id) {
+		... on Repl {
+			id
+			slug
+			language
+			isPrivate
+			lang {
+				id
+				runner: canUseShellRunner
+				packager3: supportsPackager3
+				terminal: usesTerminal2
+				interpreter: usesInterpreter
+				engine
+				mainFile
+				supportsMultiFiles
+			}
+		}
+	}
+}

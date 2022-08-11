@@ -1,5 +1,5 @@
-import fetch from 'node-fetch';
-import type { Response } from 'node-fetch';
+import fetch from '@replit/node-fetch';
+import type { Response } from '@replit/node-fetch';
 
 import { FetchConnectionMetadataError } from '@replit/crosis';
 import type { FetchConnectionMetadataResult } from '@replit/crosis';
@@ -52,7 +52,8 @@ export const govalMetadata = async (
 		throw new Error(errorText);
 	}
 
-	const connectionMetadata = await res.json();
+	// coerce to type any like previous node-fetch version
+	const connectionMetadata = (await res.json()) as any;
 
 	return {
 		token: connectionMetadata.token,
@@ -61,76 +62,3 @@ export const govalMetadata = async (
 		error: null,
 	};
 };
-
-const CURRENT_USER = `
-  query CurrentUser {
-    currentUser {
-      id
-      username
-    }
-  }
-`;
-
-const REPL = `
-  query Repl($id: String!) {
-    repl(id: $id) {
-      ... on Repl {
-        id
-        slug
-        language
-        isPrivate
-        lang {
-          id
-          runner: canUseShellRunner
-          packager3: supportsPackager3
-          terminal: usesTerminal2
-          interpreter: usesInterpreter
-          engine
-          mainFile
-          supportsMultiFiles
-        }
-      }
-    }
-  }
-`;
-
-interface GraphQLResponse {
-	data?: any;
-	errors?: any;
-}
-
-export class GraphQL {
-	private headers: Record<string, string>;
-	protected queries: Record<string, string>;
-
-	constructor(token: string) {
-		this.headers = {
-			'User-Agent': 'Mozilla/5.0',
-			'Content-Type': 'application/json',
-			'X-Requested-With': 'XMLHttpRequest',
-			Referrer: 'https://replit.com/',
-			Cookie: token ? `connect.sid=${encodeURIComponent(token)};` : '',
-		};
-
-		this.queries = {
-			CURRENT_USER,
-			REPL,
-		};
-	}
-
-	async request(query: string, variables?: Record<string, any>) {
-		const res = (await fetch('https://replit.com/graphql', {
-			method: 'POST',
-			headers: this.headers,
-			body: JSON.stringify({
-				query: this.queries[query],
-				variables: JSON.stringify(variables),
-			}),
-		}).then((res) => res.json())) as GraphQLResponse;
-
-		const { data, errors } = res;
-
-		if (errors) throw new Error('Replit GraphQL Error.');
-		return data;
-	}
-}

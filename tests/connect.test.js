@@ -22,11 +22,16 @@ describe('Check Connect method.', () => {
 describe('Check GraphQL information.', () => {
 	describe('Check.', () => {
 		test('Check for user property on <Client>.', async () => {
-			expect(Object.keys(client.user)).toMatchObject(['id', 'username']);
+			expect(Object.keys(client.user)).toMatchObject([
+				'__typename',
+				'id',
+				'username',
+			]);
 		});
 
 		test('Check for repl property on <Client>.', async () => {
 			expect(Object.keys(client.repl)).toMatchObject([
+				'__typename',
 				'id',
 				'slug',
 				'language',

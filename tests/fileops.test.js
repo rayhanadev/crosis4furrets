@@ -39,7 +39,7 @@ describe('Check Write methods.', () => {
 
 		test('Write a buffer to a file in a remote Repl.', async () => {
 			const imageBuffer = await fs.readFile(
-				__dirname + '/assets/image.png',
+				process.cwd() + '/tests/assets/image.png',
 			);
 			expect(await client.write('foo.png', imageBuffer)).toBe(true);
 		});
@@ -59,7 +59,7 @@ describe('Check Write methods.', () => {
 
 		test('Check for buffer content in files.', async () => {
 			const imageBuffer = await fs.readFile(
-				__dirname + '/assets/image.png',
+				process.cwd() + '/tests/assets/image.png',
 			);
 			expect(await client.read('foo.png')).toEqual(imageBuffer);
 		});

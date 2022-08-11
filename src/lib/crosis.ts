@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
-import readline from 'readline';
-import { Buffer } from 'buffer';
+import readline from 'node:readline';
+import { Buffer } from 'node:buffer';
 
 import { Client } from '@replit/crosis';
 import type { Channel } from '@replit/crosis';
@@ -8,7 +8,14 @@ import type { api } from '@replit/protocol';
 
 import { compile } from 'gitignore-parser';
 
-import { govalMetadata, GraphQL } from './utils.js';
+import { GraphQL } from '@rayhanadev/replit-gql';
+import type { TGraphQLClient } from '@rayhanadev/replit-gql';
+// @ts-ignore: ignore .graphql imports
+import CurrentUser from '../queries/CurrentUser.graphql';
+// @ts-ignore: ignore .graphql imports
+import ReplById from '../queries/ReplById.graphql';
+
+import { govalMetadata } from './utils.js';
 
 interface CrosisConfigOptions {
 	token: string;
@@ -71,66 +78,68 @@ type PackageListContentType<T extends boolean> =
 			? string : never;
 
 class CrosisClient {
-	private token: string;
-	replId: string;
-	protected client: Client;
-	protected gql: GraphQL;
-	user?: User;
-	repl?: Repl;
-	configFiles: ConfigFiles;
+	public replId: string;
+	public user?: User;
+	public repl?: Repl;
+	public ignore: string;
+	public configFiles: ConfigFiles;
+	public connected: boolean;
+	public persisting: boolean;
 	protected channels: Record<string, Channel>;
-	connected: boolean;
-	persisting: boolean;
+	protected client: Client;
+	protected gql: TGraphQLClient;
+	private token: string;
 
 	constructor(options: CrosisConfigOptions) {
 		const { token, replId, ignore } = options;
 		if (!token) throw new Error('UserError: Missing token parameter.');
 
 		this.client = new Client();
-		this.gql = new GraphQL(token);
+		this.gql = GraphQL(token);
 
 		this.token = token;
 		this.replId = replId;
 
-		const getReplConfig = async (): Promise<string | boolean> => {
-			try {
-				const file = <string>await this.read('.replit', 'utf8');
-				return file && file.length > 0 ? file : false;
-			} catch (error) {
-				return false;
-			}
-		};
-
-		const getReplNix = async (): Promise<string | boolean> => {
-			try {
-				const file = <string>await this.read('replit.nix', 'utf8');
-				return file && file.length > 0 ? file : false;
-			} catch (error) {
-				return false;
-			}
-		};
-
-		const getReplIgnore = async (): Promise<string | boolean> => {
-			try {
-				const file = ignore
-					? ignore
-					: <string>await this.read('.gitignore', 'utf8');
-				return file && file.length > 0 ? file : false;
-			} catch (error) {
-				return false;
-			}
-		};
-
+		this.ignore = ignore;
 		this.configFiles = {
-			'.replit': getReplConfig,
-			'replit.nix': getReplNix,
-			ignore: getReplIgnore,
+			'.replit': this.getReplConfig,
+			'replit.nix': this.getReplNix,
+			ignore: this.getReplIgnore,
 			env: null,
 		};
 
 		this.channels = {};
 		this.connected = false;
 		this.persisting = false;
+	}
+
+	async getReplConfig(): Promise<string | boolean> {
+		try {
+			const file = <string>await this.read('.replit', 'utf8');
+			return file && file.length > 0 ? file : false;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	async getReplNix(): Promise<string | boolean> {
+		try {
+			const file = <string>await this.read('replit.nix', 'utf8');
+			return file && file.length > 0 ? file : false;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	async getReplIgnore(): Promise<string | boolean> {
+		try {
+			const file = this.ignore
+				? this.ignore
+				: <string>await this.read('.gitignore', 'utf8');
+			return file && file.length > 0 ? file : false;
+		} catch (error) {
+			return false;
+		}
 	}
 
 	private async cmdTimeout(
@@ -168,8 +177,26 @@ class CrosisClient {
 				'UserError: No ReplID Found. Pass a ReplID into the constructor.',
 			);
 
-		this.user = (await this.gql.request('CURRENT_USER')).currentUser;
-		this.repl = (await this.gql.request('REPL', { id: this.replId })).repl;
+		const {
+			data: { currentUser },
+		} = await this.gql.query({
+			query: CurrentUser,
+		});
+
+		if (currentUser === null) throw new Error('UserError: Invalid token.');
+		this.user = currentUser;
+
+		const {
+			data: { repl },
+		} = await this.gql.query({
+			query: ReplById,
+			variables: {
+				id: this.replId,
+			},
+		});
+
+		if (repl === null) throw new Error('UserError: Invalid repl.');
+		this.repl = repl;
 
 		await new Promise<void>((res) => {
 			const context = null;
@@ -185,6 +212,7 @@ class CrosisClient {
 				{
 					context,
 					fetchConnectionMetadata,
+					// @ts-ignore: ws has enough compatibility
 					WebSocketClass: WebSocket,
 				},
 				({ channel }) => {
