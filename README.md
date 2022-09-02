@@ -70,7 +70,8 @@ of these operations will be limited on Repls that you do not own:
 
 #### Language Server
 
--   `<Client>.lsp(message)`: If the Repl has an LSP, send a message to it.
+-   `<Client>.lspMessage(message)`: If the Repl is legacy and has an LSP, send a message to it.
+-   `<Client>.lspStart(language)`: If the Repl is legacy and has an LSP, start a language's LSP.
 
 #### Packager (via UPM)
 

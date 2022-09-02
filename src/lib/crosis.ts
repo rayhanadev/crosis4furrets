@@ -71,7 +71,7 @@ import {
 	nixChannelLatest,
 } from './methods/nix';
 import { shellRun, shellExec, shellStop } from './methods/shell';
-import { lsp } from './methods/editor';
+import { lspStart, lspMessage } from './methods/editor';
 
 class CrosisClient {
 	public replId: string;
@@ -179,7 +179,9 @@ class CrosisClient {
 	public shellStop: typeof shellStop;
 
 	// ts-ignore: intellisense
-	public lsp: typeof lsp;
+	public lspStart: typeof lspStart;
+	// ts-ignore: intellisense
+	public lspMessage: typeof lspMessage;
 }
 
 CrosisClient.prototype.cmdTimeout = cmdTimeout;
@@ -223,6 +225,7 @@ CrosisClient.prototype.shellRun = shellRun;
 CrosisClient.prototype.shellExec = shellExec;
 CrosisClient.prototype.shellStop = shellStop;
 
-CrosisClient.prototype.lsp = lsp;
+CrosisClient.prototype.lspStart = lspStart;
+CrosisClient.prototype.lspMessage = lspMessage;
 
 export default CrosisClient;
