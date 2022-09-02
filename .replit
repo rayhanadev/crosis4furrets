@@ -1,4 +1,3 @@
-entrypoint = "src/index.ts"
 run = "yarn test"
 
 [nix]
@@ -15,8 +14,10 @@ language = "nodejs"
   guessImports = true
   enabledForHosting = false
 
+[languages]
+
 [languages.javascript]
 pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
 
-  [languages.javascript.languageServer]
-  start = [ "typescript-language-server", "--stdio" ]
+[languages.javascript.languageServer]
+start = "typescript-language-server --stdio"

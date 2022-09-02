@@ -45,6 +45,13 @@ of these operations will be limited on Repls that you do not own:
 -   `<Client>.persist()`: Persist file changes in a Repl from this connection.
 -   `<Client>.close()`: Close a client connection.
 
+#### Config
+
+-   `<Client>.dotEnv()`: Provide the parsed contents of the secrets in a Repl.
+-   `<Client>.dotReplit()`: Provide the parsed contents of the .replit file.
+-   `<Client>.updateDotReplit()`: Update the .replit file.
+-   `<Client>.gitignore()`: Provide the text content of the .gitignore file.
+
 #### File Operations
 
 -   `<Client>.read(path[, encoding])`: Read a file at a specific path. Specify an

@@ -131,6 +131,9 @@ dist
 yarn-error.log
 
 # replit
-.upm
-.config
-.cache
+.upm/
+.config/
+.cache/
+
+# tests
+tests/test.mjs
