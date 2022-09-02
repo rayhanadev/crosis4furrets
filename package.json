@@ -28,8 +28,8 @@
 		"build": "cross-env NODE_ENV=build rimraf ./dist/** && rollup --config"
 	},
 	"repository": {
-		"type": "",
-		"url": ""
+		"type": "git",
+		"url": "https://github.com/rayhanadev/crosis4furrets.git"
 	},
 	"keywords": [
 		"replit",
@@ -41,9 +41,9 @@
 	"author": "Ray Arayilakath <rayhanadev@protonmail.com> (https://www.furret.codes)",
 	"license": "MIT",
 	"bugs": {
-		"url": ""
+		"url": "https://github.com/rayhanadev/crosis4furrets/issues"
 	},
-	"homepage": "",
+	"homepage": "https://github.com/rayhanadev/crosis4furrets#usage",
 	"devDependencies": {
 		"@babel/core": "^7.15.8",
 		"@babel/plugin-transform-modules-commonjs": "^7.18.2",
