@@ -81,6 +81,15 @@ of these operations will be limited on Repls that you do not own:
 -   `<Client>.packageSearch()`: Search for packages via UPM.
 -   `<Client>.packageInfo()`: Pull package information via UPM.
 
+#### Nix Packager
+
+-   `<Client>.nixPackageAdd(packages)`: Add Nix packages to the Repl.
+-   `<Client>.nixPackageRemove()`: Remove Nix packages from the Repl.
+-   `<Client>.nixPackageList()`: List the Repl's Nix packages.
+-   `<Client>.nixPackageSearch()`: Search for Nix packages on the Nix channel.
+-   `<Client>.nixChannels()`: Pull available Nix channels.
+-   `<Client>.nixChannelLatest()`: Pull the latest Nix channel.
+
 #### Runner (via ShellRun)
 
 -   `<Client>.shellRun([, timeout])`: Run the current Repl's main command.

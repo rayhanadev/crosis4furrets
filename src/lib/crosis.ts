@@ -62,6 +62,14 @@ import {
 	packageRemove,
 	packageSearch,
 } from './methods/packager';
+import {
+	nixPackageAdd,
+	nixPackageRemove,
+	nixPackageList,
+	nixPackageSearch,
+	nixChannels,
+	nixChannelLatest,
+} from './methods/nix';
 import { shellRun, shellExec, shellStop } from './methods/shell';
 import { lsp } from './methods/editor';
 
@@ -151,6 +159,19 @@ class CrosisClient {
 	public packageSearch: typeof packageSearch;
 
 	// ts-ignore: intellisense
+	public nixPackageAdd: typeof nixPackageAdd;
+	// ts-ignore: intellisense
+	public nixPackageRemove: typeof nixPackageRemove;
+	// ts-ignore: intellisense
+	public nixPackageList: typeof nixPackageList;
+	// ts-ignore: intellisense
+	public nixPackageSearch: typeof nixPackageSearch;
+	// ts-ignore: intellisense
+	public nixChannels: typeof nixChannels;
+	// ts-ignore: intellisense
+	public nixChannelLatest: typeof nixChannelLatest;
+
+	// ts-ignore: intellisense
 	public shellRun: typeof shellRun;
 	// ts-ignore: intellisense
 	public shellExec: typeof shellExec;
@@ -190,6 +211,13 @@ CrosisClient.prototype.packageInstall = packageInstall;
 CrosisClient.prototype.packageList = packageList;
 CrosisClient.prototype.packageRemove = packageRemove;
 CrosisClient.prototype.packageSearch = packageSearch;
+
+CrosisClient.prototype.nixPackageAdd = nixPackageAdd;
+CrosisClient.prototype.nixPackageRemove = nixPackageRemove;
+CrosisClient.prototype.nixPackageList = nixPackageList;
+CrosisClient.prototype.nixPackageSearch = nixPackageSearch;
+CrosisClient.prototype.nixChannels = nixChannels;
+CrosisClient.prototype.nixChannelLatest = nixChannelLatest;
 
 CrosisClient.prototype.shellRun = shellRun;
 CrosisClient.prototype.shellExec = shellExec;
