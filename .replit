@@ -1,4 +1,4 @@
-run = "yarn test"
+run = "node tests/index.mjs"
 
 [nix]
 channel = "stable-22_05"

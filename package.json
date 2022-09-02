@@ -1,6 +1,6 @@
 {
 	"name": "crosis4furrets",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "An abstraction layer on top of @replit/crosis that makes Repl connection management and operations so easy, a Furret could do it!",
 	"sideEffects": false,
 	"type": "module",
@@ -84,6 +84,7 @@
 		"@replit/node-fetch": "^3.1.0",
 		"@replit/protocol": "^0.2.63",
 		"dotenv": "^16.0.1",
+		"dotenv-stringify": "^2.0.7",
 		"ignore": "^5.2.0",
 		"ws": "^8.8.1"
 	},

@@ -48,8 +48,9 @@ of these operations will be limited on Repls that you do not own:
 #### Config
 
 -   `<Client>.dotEnv()`: Provide the parsed contents of the secrets in a Repl.
+-   `<Client>.updateDotEnv(env)`: Update the secrets in a Repl.
 -   `<Client>.dotReplit()`: Provide the parsed contents of the .replit file.
--   `<Client>.updateDotReplit()`: Update the .replit file.
+-   `<Client>.updateDotReplit(ops)`: Update the .replit file.
 -   `<Client>.gitignore()`: Provide the text content of the .gitignore file.
 
 #### File Operations

@@ -38,6 +38,7 @@ import { cmdTimeout, channel } from './methods/internals';
 import { connect, persist, close } from './methods/connection';
 import {
 	dotEnv,
+	updateDotEnv,
 	dotReplit,
 	updateDotReplit,
 	gitignore,
@@ -109,6 +110,8 @@ class CrosisClient {
 	// ts-ignore: intellisense
 	public dotEnv: typeof dotEnv;
 	// ts-ignore: intellisense
+	public updateDotEnv: typeof updateDotEnv;
+	// ts-ignore: intellisense
 	public dotReplit: typeof dotReplit;
 	// ts-ignore: intellisense
 	public updateDotReplit: typeof updateDotReplit;
@@ -166,6 +169,7 @@ CrosisClient.prototype.persist = persist;
 CrosisClient.prototype.close = close;
 
 CrosisClient.prototype.dotEnv = dotEnv;
+CrosisClient.prototype.updateDotEnv = updateDotEnv;
 CrosisClient.prototype.dotReplit = dotReplit;
 CrosisClient.prototype.updateDotReplit = updateDotReplit;
 CrosisClient.prototype.gitignore = gitignore;
