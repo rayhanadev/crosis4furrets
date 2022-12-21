@@ -3,6 +3,10 @@ import type Crosis from '../crosis';
 import type { Channel } from '@replit/crosis';
 import type { api } from '@replit/protocol';
 
+/**
+ * @deprecated
+ * Since v1.3. Previously used to timeout shell functions.
+ */
 export async function cmdTimeout(
 	this: Crosis,
 	channel: Channel,
@@ -33,6 +37,19 @@ export async function cmdTimeout(
 	});
 }
 
+/**
+ * Helper method to manage the channels a Client opens. For an old list of
+ * services reference: https://crosis.turbio.repl.co/services
+ *
+ * @param {string} name
+ * - name of the service for the Client to open a channel for.
+ * @access package
+ * @example
+ *     const fileChan = await client.channel('files');
+ *     // See https://crosisdoc.util.repl.co/classes/Channel.html
+ *     // for more information on channels.
+ *
+ */
 export async function channel(name: string): Promise<Channel> {
 	const stored = this.channels[name];
 	if (stored) {

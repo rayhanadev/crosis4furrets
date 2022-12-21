@@ -2,6 +2,8 @@ import WebSocket from 'ws';
 
 import type Crosis from '../crosis';
 
+import { test } from 'replit-login';
+
 // @ts-ignore: ignore .graphql imports
 import CurrentUser from '../../queries/CurrentUser.graphql';
 // @ts-ignore: ignore .graphql imports
@@ -9,20 +11,24 @@ import ReplById from '../../queries/ReplById.graphql';
 
 import { govalMetadata } from '../utils';
 
+/**
+ * Open a connection to a remote Repl instance. You must perform this before any
+ * actions are taken via the Client.
+ *
+ * @example
+ *     await client.connect();
+ *
+ */
 export async function connect(this: Crosis): Promise<void> {
-	if (!this.replId)
-		throw new Error(
-			'UserError: No ReplID Found. Pass a ReplID into the constructor.',
-		);
+	const { success } = await test(decodeURIComponent(this.token));
+	if (!success) throw new Error('UserError: Invalid token');
 
-	const {
-		data: { currentUser },
-	} = await this.gql.query({
+	const { data } = await this.gql.query({
 		query: CurrentUser,
 	});
 
-	if (currentUser === null) throw new Error('UserError: Invalid token.');
-	this.user = currentUser;
+	if (data.currentUser === null) throw new Error('UserError: Invalid token.');
+	this.user = data.currentUser;
 
 	const {
 		data: { repl },
@@ -68,6 +74,18 @@ export async function connect(this: Crosis): Promise<void> {
 	});
 }
 
+/**
+ * Persist any file-changes on the remote Replit. Useful if you are interacting
+ * with a Replit with the intentional of keeping changes.
+ *
+ * @example
+ *     await client.persist();
+ *
+ * @example
+ *     const success = await client.persist();
+ *     if (success) console.log('Persisting files on the remote Repl.');
+ *
+ */
 export async function persist(): Promise<boolean> {
 	const gcsfilesChan = await this.channel('gcsfiles');
 
@@ -80,6 +98,14 @@ export async function persist(): Promise<boolean> {
 	return res.ok ? true : false;
 }
 
+/**
+ * Close a connection to a remote Repl. This must be done to exit the process
+ * and perform cleanups.
+ *
+ * @example
+ *     client.close();
+ *
+ */
 export function close(): void {
 	if (this.connected === false) {
 		throw new Error(

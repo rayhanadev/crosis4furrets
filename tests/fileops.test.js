@@ -39,15 +39,15 @@ describe('Check Write methods.', () => {
 
 		test('Write a buffer to a file in a remote Repl.', async () => {
 			const imageBuffer = await fs.readFile(
-				process.cwd() + '/tests/assets/image.png',
+				process.cwd() + '/tests/assets/image.jpeg',
 			);
-			expect(await client.write('foo.png', imageBuffer)).toBe(true);
+			expect(await client.write('foo.jpeg', imageBuffer)).toBe(true);
 		});
 	});
 
 	describe('Check.', () => {
 		test('Check for written files in remote Repl.', async () => {
-			const expected = ['foo.txt', 'foo.png'];
+			const expected = ['foo.txt', 'foo.jpeg'];
 			expect(await client.readdir('.')).toEqual(
 				expect.arrayContaining(expected),
 			);
@@ -59,9 +59,9 @@ describe('Check Write methods.', () => {
 
 		test('Check for buffer content in files.', async () => {
 			const imageBuffer = await fs.readFile(
-				process.cwd() + '/tests/assets/image.png',
+				process.cwd() + '/tests/assets/image.jpeg',
 			);
-			expect(await client.read('foo.png')).toEqual(imageBuffer);
+			expect(await client.read('foo.jpeg')).toEqual(imageBuffer);
 		});
 	});
 });
@@ -87,13 +87,13 @@ describe('Check Move method.', () => {
 	describe('Perform action.', () => {
 		test('Move files to a folder in a remote Repl.', async () => {
 			expect(await client.move('foo.txt', 'foo/foo.txt')).toBe(true);
-			expect(await client.move('foo.png', 'foo/foo.png')).toBe(true);
+			expect(await client.move('foo.jpeg', 'foo/foo.jpeg')).toBe(true);
 		});
 	});
 
 	describe('Check.', () => {
 		test('Check for files in folder on the remote Repl.', async () => {
-			const expected = ['foo.txt', 'foo.png'];
+			const expected = ['foo.txt', 'foo.jpeg'];
 			expect(await client.readdir('foo')).toEqual(
 				expect.arrayContaining(expected),
 			);
@@ -115,6 +115,12 @@ describe('Check Remove method.', () => {
 				expect.arrayContaining(expected),
 			);
 		});
+	});
+});
+
+describe('Check Stat method.', () => {
+	test('Get stats on a file in a remote Repl.', async () => {
+		expect((await client.stat('index.js')).exists).toBe(true);
 	});
 });
 

@@ -1,4 +1,4 @@
-![](https://edge.furret.codes/f/crosis4furrets.png)
+![](./.docs/banner.png)
 
 # Crosis4Furrets
 
@@ -20,101 +20,56 @@ $ yarn add crosis4furrets
 ### Main API
 
 ```js
-import { Crosis } from "crosis4furrets";
-
-const client = new Crosis({ token: '', replId: '' });
+import { Client } from 'crosis4furrets';
+const client = new Client({
+  token: process.env.REPLIT_TOKEN,
+  replId: process.env.REPLIT_REPL_ID,
+});
 ```
 
-which returns a [`<Client>`](#client)
-
-### Options
-
--   token: A user's `connect.sid` cookie from Replit.
--   replId: An ID connected to any public Repl (or a user's private Repls).
--   ignore?: Optionally override a Repl's `.gitignore` file with your own. Used when
-    created a recursed directory.
-
-### Client
-
-A `<Client>` opens up many operations that you can perform on a Repl. Note, several
-of these operations will be limited on Repls that you do not own:
-
-#### Connection
-
--   `<Client>.connect()`: Connect a client the specified Repl.
--   `<Client>.persist()`: Persist file changes in a Repl from this connection.
--   `<Client>.close()`: Close a client connection.
-
-#### Config
-
--   `<Client>.dotEnv()`: Provide the parsed contents of the secrets in a Repl.
--   `<Client>.updateDotEnv(env)`: Update the secrets in a Repl.
--   `<Client>.dotReplit()`: Provide the parsed contents of the .replit file.
--   `<Client>.updateDotReplit(ops)`: Update the .replit file.
--   `<Client>.gitignore()`: Provide the text content of the .gitignore file.
-
-#### File Operations
-
--   `<Client>.read(path[, encoding])`: Read a file at a specific path. Specify an
-    encoding to parse the file, otherwise returns a Buffer.
--   `<Client>.readdir(path)`: List files in a specific directory.
--   `<Client>.recursedir(path[, withIgnore = true])`: Recurse through files in a
-    specific directory. Automatically reads .gitignore files and skips those files.
--   `<Client>.write(path, content)`: Write content to a file. Can be Buffer or string
-    content.
--   `<Client>.mkdir(path)`: Make a directory at a specific path.
--   `<Client>.remove(path)`: Remove a file at a specific path.
--   `<Client>.removeAll()`: Remove all files in the Repl.
--   `<Client>.move(oldPath, newPath)`: Move a file to a specific location.
--   `<Client>.snapshot()`: Capture a filesystem snapshot of the Repl.
-
-#### Language Server
-
--   `<Client>.lspMessage(message)`: If the Repl is legacy and has an LSP, send a message to it.
--   `<Client>.lspStart(language)`: If the Repl is legacy and has an LSP, start a language's LSP.
-
-#### Packager (via UPM)
-
--   `<Client>.packageInstall()`: Install the Repl's packages.
--   `<Client>.packageAdd(packages)`: Add packages to the Repl.
--   `<Client>.packageRemove()`: Remove packages from the Repl.
--   `<Client>.packageList()`: List the Repl's packages.
--   `<Client>.packageSearch()`: Search for packages via UPM.
--   `<Client>.packageInfo()`: Pull package information via UPM.
-
-#### Nix Packager
-
--   `<Client>.nixPackageAdd(packages)`: Add Nix packages to the Repl.
--   `<Client>.nixPackageRemove()`: Remove Nix packages from the Repl.
--   `<Client>.nixPackageList()`: List the Repl's Nix packages.
--   `<Client>.nixPackageSearch()`: Search for Nix packages on the Nix channel.
--   `<Client>.nixChannels()`: Pull available Nix channels.
--   `<Client>.nixChannelLatest()`: Pull the latest Nix channel.
-
-#### Runner (via ShellRun)
-
--   `<Client>.shellRun([, timeout])`: Run the current Repl's main command.
--   `<Client>.shellExec(command[, args, timeout])`: Run a command (with optional
-    arguments) on the Repl's shell.
--   `<Client>.shellStop([, timeout])`: Stop the Repl's current process.
+which returns a [`<Client>`](#client). See [DOCUMENTATION.md](./DOCUMENTATION.md) for docs on how
+to use Crosis4Furrets.
 
 ## Example
 
 ```js
-// using ESM, if in CommonJS use an async context!
-import { Crosis } from "crosis4furrets";
+import { Crosis } from 'crosis4furrets';
 
 const client = new Crosis({
-  token: process.env.REPLIT_TOKEN, // connect.sid
-  replId: "68fff490-4ce3-4123-b429-c11622fb8dd3" // id of a repl
+  token: process.env.REPLIT_TOKEN,
+  replId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 });
 
 await client.connect();
-console.log("Read:\n", await client.read("index.js", "utf-8"));
+console.log('Read:\n', await client.read('index.js', 'utf-8'));
 ```
 
-Note: If you want an easy way to get ReplID's, visit
-[this Repl](https://ally.furret.codes/replid).
+### Access Keys
+
+Run the following command in your Repl to get its **Repl ID**:
+
+```bash
+$ echo $REPL_ID
+```
+
+or alternatively make a [GraphQL Request](https://replit.com/graphql)
+with the following query:
+
+```graphql
+query ReplID ($url: String) {
+  repl(url: $url) {
+    ...on Repl { id }
+  }
+}
+```
+
+```json
+{
+  "url": "/@<username>/<repl_slug>"
+}
+```
+
+To get a **Replit Token**, you can visit [this Repl](https://login-test.rayhanadev.repl.co).
 
 ## Contributing
 

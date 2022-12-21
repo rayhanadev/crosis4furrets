@@ -137,3 +137,6 @@ yarn-error.log
 
 # tests
 tests/test.mjs
+
+# distribution bundles
+dist/

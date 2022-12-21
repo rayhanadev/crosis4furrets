@@ -1,13 +1,18 @@
-run = "node tests/tests.mjs"
+run = "yarn test"
 
 [nix]
-channel = "stable-22_05"
+channel = "stable-22_11"
 
 [env]
 XDG_CONFIG_HOME = "/home/runner/.config"
+PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin"
+npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global"
+
+[gitHubImport]
+requiredFiles = [".replit", "replit.nix", ".config"]
 
 [packager]
-language = "nodejs"
+language = "nodejs-yarn"
 
   [packager.features]
   packageSearch = true
@@ -16,8 +21,8 @@ language = "nodejs"
 
 [languages]
 
-[languages.javascript]
-pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
-
-[languages.javascript.languageServer]
-start = "typescript-language-server --stdio"
+	[languages.javascript]
+	pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
+	
+	[languages.javascript.languageServer]
+	start = "typescript-language-server --stdio"

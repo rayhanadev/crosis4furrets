@@ -1,5 +1,6 @@
 const graphql = require('@rollup/plugin-graphql');
 const typescript = require('@rollup/plugin-typescript');
+const sourcemaps = require('rollup-plugin-sourcemaps');
 const { babel } = require('@rollup/plugin-babel');
 const { nodeResolve: resolve } = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
@@ -18,25 +19,25 @@ module.exports = [
 				file: `dist/index.cjs`,
 				format: 'cjs',
 				preferConst: true,
+				sourcemap: true,
 			},
 			{
 				file: `dist/index.mjs`,
 				format: 'esm',
 				preferConst: true,
+				sourcemap: true,
 			},
 		],
 		plugins: [
 			graphql(),
 			typescript({ tsconfig: './tsconfig.json' }),
+			// sourcemaps(),
 			babel({
 				babelHelpers: 'bundled',
 				exclude: '**/node_modules/**',
 			}),
 			resolve(),
 			commonjs(),
-
-			/* Optionally uncomment the line below
-				 to minify the final bundle: */
 			// terser(),
 		],
 		external: [
@@ -46,13 +47,17 @@ module.exports = [
 		],
 	},
 	{
-		input: 'dist/dts/index.d.ts',
+		input: 'dist/index.d.ts',
 		output: [{ file: 'dist/index.d.ts', format: 'es' }],
-		plugins: [dts(), del({ hook: 'buildEnd', targets: './dist/dts' })],
+		plugins: [
+			dts(),
+			del({ hook: 'buildEnd', targets: ['./dist/dts/', './dist/lib/'] }),
+		],
 		external: [
 			...builtinModules,
 			...Object.keys(dependencies),
 			'node:buffer',
+			'node:fs',
 		],
 	},
 ];

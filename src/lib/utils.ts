@@ -9,6 +9,40 @@ interface Options {
 	replId: string;
 }
 
+/**
+ * Encode the given token as a URL-encoded string.
+ *
+ * @param {string} token
+ * - the token to encode.
+ * @access package
+ * @example
+ *     const encoded = encode(token);
+ *     console.log(encoded);
+ *
+ */
+export const encode = (token: string): string => {
+	if (token === encodeURIComponent(token)) return token;
+	return encodeURIComponent(token);
+};
+
+/**
+ * Helper function to fetch Goval metadata without having to mint it via API
+ * Keys.
+ *
+ * @param {AbortSignal} signal
+ * - a signal to abort the fetch request.
+ * @param {Options} options
+ * - information for the request.
+ * @access package
+ * @example
+ *     const metadata = await govalMetadata(signal, {
+ *     	token: process.env.REPLIT_TOKEN,
+ *     	replId: process.env.REPLIT_REPL_ID,
+ *     });
+ *
+ *     console.log(metadata);
+ *
+ */
 export const govalMetadata = async (
 	signal: AbortSignal,
 	options: Options,

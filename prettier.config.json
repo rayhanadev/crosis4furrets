@@ -3,5 +3,10 @@
 	"useTabs": true,
 	"tabWidth": 4,
 	"singleQuote": true,
-	"embeddedLanguageFormatting": "off"
+	"embeddedLanguageFormatting": "off",
+	"jsdocFormatExamples": true,
+	"jsdocUseColumns": false,
+	"jsdocAllowDescriptionOnNewLinesForTags": [],
+	"jsdocLinesBetweenExampleTagAndCode": 0,
+	"plugins": ["@homer0/prettier-plugin-jsdoc"]
 }

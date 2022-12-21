@@ -4,10 +4,37 @@ import type { Channel } from '@replit/crosis';
 import { GraphQL } from '@rayhanadev/replit-gql';
 import type { TGraphQLClient } from '@rayhanadev/replit-gql';
 
+import type { ReadStream, WriteStream } from 'node:fs';
+
+type InputStream =
+	| ReadStream
+	| (NodeJS.ReadStream & {
+			fd: 0;
+	  });
+
+type OutputStream =
+	| WriteStream
+	| (NodeJS.WriteStream & {
+			fd: 1;
+	  });
+
+type ErrorStream =
+	| WriteStream
+	| (NodeJS.WriteStream & {
+			fd: 2;
+	  });
+
+interface Streams {
+	stdin: InputStream;
+	stdout: OutputStream;
+	stderr: ErrorStream;
+}
+
 interface CrosisConfigOptions {
 	token: string;
 	replId: string;
 	ignore?: string;
+	streams?: Streams;
 }
 
 interface User {
@@ -52,6 +79,7 @@ import {
 	move,
 	remove,
 	removeAll,
+	stat,
 	snapshot,
 } from './methods/fileops';
 import {
@@ -73,6 +101,69 @@ import {
 import { shellRun, shellExec, shellStop } from './methods/shell';
 import { lspStart, lspMessage } from './methods/editor';
 
+import { encode } from './utils';
+
+/**
+ * Creates a new Client that can be used to interact with a Remote Repl.
+ *
+ * @class
+ * @param {CrosisConfigOptions} options
+ * - the configuration options for the client.
+ * @param {string} options.token
+ * - the token to use for authentication.
+ * @param {string} options.replId
+ * - the replId to use for the client.
+ * @param {string} [options.ignore]
+ * - a gitignore file to enfore when recursing a Repl's directory.
+ * @param {Streams} [options.streams]
+ * - the streams to use for the client.
+ * @param {string} [options.streams.stdin]
+ * - the stdin stream for the client.
+ * @param {string} [options.streams.stdout]
+ * - the stdout stream for the client.
+ * @param {string} [options.streams.stderr]
+ * - the stderr stream for the client.
+ * @example
+ *     import Client from 'crosis4furrets';
+ *     const client = new Client({
+ *     	token: process.env.REPLIT_TOKEN,
+ *     	replId: process.env.REPLIT_REPL_ID,
+ *     });
+ *
+ * @example
+ *     import Client from 'crosis4furrets';
+ *
+ *     const client = new Client({
+ *     	token: process.env.REPLIT_TOKEN,
+ *     	replId: process.env.REPLIT_REPL_ID,
+ *     	ignore: fs.readFileSync('default.gitignore'),
+ *     });
+ *
+ * @example
+ *     import fs from 'node:fs';
+ *     import Client from 'crosis4furrets';
+ *
+ *     const client = new Client({
+ *     	token: process.env.REPLIT_TOKEN,
+ *     	replId: process.env.REPLIT_REPL_ID,
+ *     	ignore: fs.readFileSync('default.gitignore'),
+ *     });
+ *
+ * @example
+ *     import fs from 'node:fs';
+ *     import Client from 'crosis4furrets';
+ *
+ *     const client = new Client({
+ *     	token: process.env.REPLIT_TOKEN,
+ *     	replId: process.env.REPLIT_REPL_ID,
+ *     	streams: {
+ *     		stdin: process.stdin,
+ *     		stdout: process.stdout,
+ *     		stderr: fs.createWriteStream('error.txt'),
+ *     	},
+ *     });
+ *
+ */
 class CrosisClient {
 	public replId: string;
 	public user?: User;
@@ -80,21 +171,37 @@ class CrosisClient {
 	public ignore: string;
 	public connected: boolean;
 	public persisting: boolean;
+	public streams: Streams;
 	protected channels: Record<string, Channel>;
 	protected client: Client;
 	protected gql: TGraphQLClient;
 	protected token: string;
 
 	constructor(options: CrosisConfigOptions) {
-		const { token, replId, ignore } = options;
+		const { token, replId, ignore, streams } = options;
 		if (!token) throw new Error('UserError: Missing token parameter.');
 		if (!replId) throw new Error('UserError: Missing replId parameter.');
 
+		if (streams) {
+			this.streams = {
+				stdin: process.stdin,
+				stdout: process.stdout,
+				stderr: process.stderr,
+				...streams,
+			};
+		} else {
+			this.streams = {
+				stdin: process.stdin,
+				stdout: process.stdout,
+				stderr: process.stderr,
+			};
+		}
+
+		this.token = encode(token);
+		this.replId = replId;
+
 		this.client = new Client();
 		this.gql = GraphQL(token);
-
-		this.token = token;
-		this.replId = replId;
 
 		this.ignore = ignore;
 
@@ -142,6 +249,8 @@ class CrosisClient {
 	public remove: typeof remove;
 	// ts-ignore: intellisense
 	public removeAll: typeof removeAll;
+	// ts-ignore: intellisense
+	public stat: typeof stat;
 	// ts-ignore: intellisense
 	public snapshot: typeof snapshot;
 
@@ -205,6 +314,7 @@ CrosisClient.prototype.mkdir = mkdir;
 CrosisClient.prototype.move = move;
 CrosisClient.prototype.remove = remove;
 CrosisClient.prototype.removeAll = removeAll;
+CrosisClient.prototype.stat = stat;
 CrosisClient.prototype.snapshot = snapshot;
 
 CrosisClient.prototype.packageAdd = packageAdd;

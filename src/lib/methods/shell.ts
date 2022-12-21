@@ -1,22 +1,23 @@
-import readline from 'node:readline';
+import { Console } from 'node:console';
 
 import type Crosis from '../crosis';
 
-export async function shellRun(
-	this: Crosis,
-	timeout?: number,
-): Promise<boolean> {
+/**
+ * Execute the current Run command in a remote Repl.
+ *
+ * @example
+ *     await client.shellRun();
+ *
+ * @example
+ *     const replShell = await client.shellRun();
+ *     replShell.log('[PROCESS]: Incoming data.');
+ *
+ */
+export async function shellRun(this: Crosis): Promise<Console | boolean> {
 	if (!this.repl.lang.runner) return false;
-
-	await this.packageInstall();
-
 	const runChan = await this.channel('shellrun2');
 
-	const rl = readline.createInterface({
-		input: process.stdin,
-		output: process.stdout,
-		terminal: true,
-	});
+	const shellStream = new Console(this.streams.stdout, this.streams.stderr);
 
 	let lastLine = '';
 
@@ -26,39 +27,51 @@ export async function shellRun(
 				lastLine = lastLine.slice(cmd.output.length);
 				return;
 			}
-			process.stdout.write(cmd.output);
+
+			this.streams.stdout.write(cmd.output);
 		}
-		if (cmd.hint) process.stdout.write('Hint: ' + cmd.hint.text);
+
+		if (cmd.hint) this.streams.stdout.write('\nHint: ' + cmd.hint.text);
 	});
 
 	runChan.send({ clear: {} });
 	runChan.send({ runMain: {} });
-	rl.on('line', (input) => {
-		lastLine = input + '\r\r\n';
-		runChan.send({ input });
+	this.streams.stdin.on('data', (input) => {
+		lastLine = input.toString() + '\r\r\n';
+		runChan.send({ input: input.toString() });
 		runChan.send({ input: '\r\n' });
 	});
 
-	return await this.cmdTimeout(runChan, timeout);
+	return shellStream;
 }
 
+/**
+ * Execute a shell command in a remote Repl.
+ *
+ * @param {string} cmd
+ * - the command to run.
+ * @param {string[]} args
+ * - arguments to pass to the command.
+ * @example
+ *     await client.shellExec('ls');
+ *
+ * @example
+ *     await client.shellExec('ls', ['-a']);
+ *
+ * @example
+ *     const replShell = await client.shellExec('ls');
+ *     replShell.log('[PROCESS]: Incoming data.');
+ *
+ */
 export async function shellExec(
 	this: Crosis,
 	cmd: string,
 	args?: string[],
-	timeout?: number,
-): Promise<boolean> {
+): Promise<Console | boolean> {
 	if (!this.repl.lang.runner) return false;
-
-	await this.packageInstall();
-
 	const runChan = await this.channel('shellrun2');
 
-	const rl = readline.createInterface({
-		input: process.stdin,
-		output: process.stdout,
-		terminal: true,
-	});
+	const shellStream = new Console(this.streams.stdout, this.streams.stderr);
 
 	let lastLine = '';
 
@@ -68,32 +81,64 @@ export async function shellExec(
 				lastLine = lastLine.slice(cmd.output.length);
 				return;
 			}
-			process.stdout.write(cmd.output);
+
+			this.streams.stdout.write(cmd.output);
 		}
-		if (cmd.hint) process.stdout.write('Hint: ' + cmd.hint.text);
+
+		if (cmd.hint) this.streams.stdout.write('\nHint: ' + cmd.hint.text);
 	});
 
 	const exec = args ? `${cmd} ${args.join(' ')}` : cmd;
 
 	runChan.send({ clear: {} });
 	runChan.send({ input: exec });
-	rl.on('line', (input) => {
-		lastLine = input + '\r\r\n';
-		runChan.send({ input });
+	this.streams.stdin.on('data', (input) => {
+		lastLine = input.toString() + '\r\r\n';
+		runChan.send({ input: input.toString() });
 		runChan.send({ input: '\r\n' });
 	});
 
-	return await this.cmdTimeout(runChan, timeout);
+	return shellStream;
 }
 
-export async function shellStop(
-	this: Crosis,
-	timeout?: number,
-): Promise<boolean> {
-	if (!this.repl.lang.interpreter) return false;
+/**
+ * Stop a remote Repl's current Run command.
+ *
+ * @example
+ *     await client.shellStop();
+ *
+ * @example
+ *     const replShell = await client.shellStop();
+ *     replShell.log('[PROCESS]: Stopped remote Repl from running.');
+ *
+ */
+export async function shellStop(this: Crosis): Promise<Console | boolean> {
+	if (!this.repl.lang.runner) return false;
+	const runChan = await this.channel('shellrun2');
 
-	const runChan = await this.channel('interp2');
+	const shellStream = new Console(this.streams.stdout, this.streams.stderr);
+
+	let lastLine = '';
+
+	runChan.onCommand((cmd) => {
+		if (cmd.output) {
+			if (lastLine.startsWith(cmd.output)) {
+				lastLine = lastLine.slice(cmd.output.length);
+				return;
+			}
+
+			this.streams.stdout.write(cmd.output);
+		}
+
+		if (cmd.hint) this.streams.stdout.write('\nHint: ' + cmd.hint.text);
+	});
+
 	runChan.send({ clear: {} });
+	this.streams.stdin.on('data', (input) => {
+		lastLine = input.toString() + '\r\r\n';
+		runChan.send({ input: input.toString() });
+		runChan.send({ input: '\r\n' });
+	});
 
-	return await this.cmdTimeout(runChan, timeout);
+	return shellStream;
 }
