@@ -16,11 +16,11 @@ new Client(options)
     -   `token: string`: the token to use for authentication.
     -   `replId: string`: the replId to use for the client.
     -   `[ignore]: string`: a gitignore file to enfore when recursing a Repl's directory.
+    -   `[fetchGovalMetadata]`: a low-level handler to replace crosis4furrets method of fetching Goval Metadata Tokens
     -   `[streams]`: the streams to use for the client.
         -   `[stdin]: fs.ReadStream`: the stdin stream for the client.
         -   `[stdout]: fs.WriteStream`: the stdout stream for the client.
         -   `[stderr]: fs.WriteStream`: the stderr stream for the client.
-        -   `[fetchGovalMetadata]`: a low-level handler to replace crosis4furrets method of fetching Goval Metadata Tokens
 
 **Example:**
 
@@ -31,25 +31,25 @@ import { Client } from 'crosis4furrets';
 const ignorefile = await fs.readFile('local.gitignore');
 
 const streams = {
-	stdin: process.stdin,
-	stdout: fs.createWriteStream('output.txt'),
-	stderr: fs.createWriteStream('error.txt'),
+  stdin: process.stdin,
+  stdout: fs.createWriteStream('output.txt'),
+  stderr: fs.createWriteStream('error.txt'),
 };
 
 const fetchGovalMetadata = (signal, { replId }) => {
-	// Mint a Goval Metadata Token and return it.
-	// You likely will not need to specify this
-	// function and crosis4furrets built-in
-	// handler will suffice.
+  // Mint a Goval Metadata Token and return it.
+  // You likely will not need to specify this
+  // function and crosis4furrets built-in
+  // handler will suffice.
 
-	// Presuming you have a Goval Metadata Token
-	// stored in your Secrets.
-	return JSON.parse(process.env.GOVAL_METADATA);
+  // Presuming you have a Goval Metadata Token
+  // stored in your Secrets.
+  return JSON.parse(process.env.GOVAL_METADATA);
 };
 
 const client = new Client({
   streams,
-	fetchGovalMetadata,
+  fetchGovalMetadata,
   ignore: ignorefile,
   token: process.env.REPLIT_TOKEN,
   replId: process.env.REPLIT_REPL_ID,
