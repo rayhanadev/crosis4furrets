@@ -20,6 +20,7 @@ new Client(options)
         -   `[stdin]: fs.ReadStream`: the stdin stream for the client.
         -   `[stdout]: fs.WriteStream`: the stdout stream for the client.
         -   `[stderr]: fs.WriteStream`: the stderr stream for the client.
+        -   `[fetchGovalMetadata]`: a low-level handler to replace crosis4furrets method of fetching Goval Metadata Tokens
 
 **Example:**
 
@@ -35,8 +36,20 @@ const streams = {
 	stderr: fs.createWriteStream('error.txt'),
 };
 
+const fetchGovalMetadata = (signal, { replId }) => {
+	// Mint a Goval Metadata Token and return it.
+	// You likely will not need to specify this
+	// function and crosis4furrets built-in
+	// handler will suffice.
+
+	// Presuming you have a Goval Metadata Token
+	// stored in your Secrets.
+	return JSON.parse(process.env.GOVAL_METADATA);
+};
+
 const client = new Client({
   streams,
+	fetchGovalMetadata,
   ignore: ignorefile,
   token: process.env.REPLIT_TOKEN,
   replId: process.env.REPLIT_REPL_ID,

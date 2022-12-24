@@ -1,9 +1,11 @@
 import { Client } from '@replit/crosis';
 import type { Channel } from '@replit/crosis';
+import type { FetchConnectionMetadataResult } from '@replit/crosis';
 
 import { GraphQL } from '@rayhanadev/replit-gql';
 import type { TGraphQLClient } from '@rayhanadev/replit-gql';
 
+import type { Options } from './utils';
 import type { ReadStream, WriteStream } from 'node:fs';
 
 type InputStream =
@@ -30,11 +32,17 @@ interface Streams {
 	stderr: ErrorStream;
 }
 
+type FetchGovalMetadataFunc = (
+	signal: AbortSignal,
+	options: Options,
+) => Promise<FetchConnectionMetadataResult>;
+
 interface CrosisConfigOptions {
 	token: string;
 	replId: string;
 	ignore?: string;
 	streams?: Streams;
+	fetchGovalMetadata?: FetchGovalMetadataFunc;
 }
 
 interface User {
@@ -101,7 +109,7 @@ import {
 import { shellRun, shellExec, shellStop } from './methods/shell';
 import { lspStart, lspMessage } from './methods/editor';
 
-import { encode } from './utils';
+import { encode, govalMetadata } from './utils';
 
 /**
  * Creates a new Client that can be used to interact with a Remote Repl.
@@ -123,6 +131,8 @@ import { encode } from './utils';
  * - the stdout stream for the client.
  * @param {string} [options.streams.stderr]
  * - the stderr stream for the client.
+ * @param {FetchGovalMetadataFunc} [fetchGovalMetadata]
+ * - a function to handle fetching goval metadata when connecting to a Repl.
  * @example
  *     import Client from 'crosis4furrets';
  *     const client = new Client({
@@ -163,6 +173,20 @@ import { encode } from './utils';
  *     	},
  *     });
  *
+ * @example
+ *     import fs from 'node:fs';
+ *     import Client from 'crosis4furrets';
+ *
+ *     const client = new Client({
+ *     	token: process.env.REPLIT_TOKEN,
+ *     	replId: process.env.REPLIT_REPL_ID,
+ *     	fetchGovalMetadata: (signal, { replId }) => {
+ *     		// Mint a Repl's Goval Metadata Token
+ *     		// somehow and return it.
+ *     		return process.env.REPL_GOVAL_METADATA;
+ *     	},
+ *     });
+ *
  */
 class CrosisClient {
 	public replId: string;
@@ -172,13 +196,14 @@ class CrosisClient {
 	public connected: boolean;
 	public persisting: boolean;
 	public streams: Streams;
+	public fetchGovalMetadata: FetchGovalMetadataFunc;
 	protected channels: Record<string, Channel>;
 	protected client: Client;
 	protected gql: TGraphQLClient;
 	protected token: string;
 
 	constructor(options: CrosisConfigOptions) {
-		const { token, replId, ignore, streams } = options;
+		const { token, replId, ignore, streams, fetchGovalMetadata } = options;
 		if (!token) throw new Error('UserError: Missing token parameter.');
 		if (!replId) throw new Error('UserError: Missing replId parameter.');
 
@@ -196,6 +221,8 @@ class CrosisClient {
 				stderr: process.stderr,
 			};
 		}
+
+		this.fetchGovalMetadata = fetchGovalMetadata || govalMetadata;
 
 		this.token = encode(token);
 		this.replId = replId;

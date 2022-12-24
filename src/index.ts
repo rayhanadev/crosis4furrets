@@ -1,2 +1,2 @@
 import Crosis from './lib/crosis';
-export { Crosis };
+export { Crosis as Client };

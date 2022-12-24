@@ -4,7 +4,7 @@ import type { Response } from '@replit/node-fetch';
 import { FetchConnectionMetadataError } from '@replit/crosis';
 import type { FetchConnectionMetadataResult } from '@replit/crosis';
 
-interface Options {
+export interface Options {
 	token: string;
 	replId: string;
 }

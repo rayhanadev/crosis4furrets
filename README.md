@@ -33,9 +33,9 @@ to use Crosis4Furrets.
 ## Example
 
 ```js
-import { Crosis } from 'crosis4furrets';
+import { Client } from 'crosis4furrets';
 
-const client = new Crosis({
+const client = new Client({
   token: process.env.REPLIT_TOKEN,
   replId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 });

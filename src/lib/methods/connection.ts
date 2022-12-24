@@ -9,8 +9,6 @@ import CurrentUser from '../../queries/CurrentUser.graphql';
 // @ts-ignore: ignore .graphql imports
 import ReplById from '../../queries/ReplById.graphql';
 
-import { govalMetadata } from '../utils';
-
 /**
  * Open a connection to a remote Repl instance. You must perform this before any
  * actions are taken via the Client.
@@ -46,7 +44,7 @@ export async function connect(this: Crosis): Promise<void> {
 		const context = null;
 
 		const fetchConnectionMetadata = async (signal: AbortSignal) => {
-			return await govalMetadata(signal, {
+			return await this.fetchGovalMetadata(signal, {
 				token: this.token,
 				replId: this.replId,
 			});
