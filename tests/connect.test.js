@@ -1,6 +1,6 @@
-import { Crosis } from '../dist/index.mjs';
+import { Client } from '../dist/index.mjs';
 
-const client = new Crosis({
+const client = new Client({
 	token: process.env.REPLIT_TOKEN,
 	replId: process.env.REPLIT_ID,
 });

@@ -16,7 +16,7 @@ new Client(options)
     -   `token: string`: the token to use for authentication.
     -   `replId: string`: the replId to use for the client.
     -   `[ignore]: string`: a gitignore file to enfore when recursing a Repl's directory.
-    -   `[fetchGovalMetadata]`: a low-level handler to replace crosis4furrets method of fetching Goval Metadata Tokens
+    -   `[fetchGovalMetadata]: (signal, { replId, token }) => Promise<`: a low-level handler to replace crosis4furrets method of fetching Goval Metadata Tokens
     -   `[streams]`: the streams to use for the client.
         -   `[stdin]: fs.ReadStream`: the stdin stream for the client.
         -   `[stdout]: fs.WriteStream`: the stdout stream for the client.

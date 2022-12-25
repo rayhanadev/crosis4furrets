@@ -120,9 +120,22 @@ export async function recursedir(
 	path: string,
 	withIgnore = true,
 ): Promise<string[]> {
-	const ignoreFile = await this.gitignore();
+	let ignoreFile = '';
+	if (this.ignore && this.ignore.length > 0) {
+		ignoreFile = this.ignore;
+	} else {
+		const replIgnoreFile = await this.gitignore();
+		if (replIgnoreFile) {
+			ignoreFile = replIgnoreFile as string;
+		} else {
+			ignoreFile = '';
+		}
+	}
+
 	const ig =
-		withIgnore && ignoreFile ? ignore().add(<string>ignoreFile) : false;
+		withIgnore && ignoreFile.length > 0
+			? ignore().add(<string>ignoreFile)
+			: false;
 
 	const isDir = (file: api.File) => file.type && file.type === 1;
 
