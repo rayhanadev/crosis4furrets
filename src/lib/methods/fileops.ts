@@ -148,12 +148,24 @@ export async function recursedir(
 				const leadingPath = dirPath + '/' === './' ? '' : dirPath + '/';
 				const filePath = leadingPath + file.path;
 
+				if(!ig) {
+					if (isDir(file)) {
+						arrayOfFiles = await recurse(filePath, arrayOfFiles);
+					} else {
+						arrayOfFiles.push(filePath);
+					}
+					
+					return;
+				}
+
 				if (ig && !ig.ignores(filePath)) {
 					if (isDir(file)) {
 						arrayOfFiles = await recurse(filePath, arrayOfFiles);
 					} else {
 						arrayOfFiles.push(filePath);
 					}
+
+					return;
 				}
 			}),
 		);
