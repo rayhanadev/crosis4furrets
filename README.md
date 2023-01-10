@@ -5,14 +5,17 @@
 An abstraction layer on top of [@replit/crosis](https://www.npmjs.com/package/@replit/crosis)
 that makes Repl connection management and operations so easy, a Furret could do it! :tada:
 
+> The latest version of `crosis4furrets@1.3.0-beta.*` is bleeding edge, it is recommended you
+> use `crosis4furrets@1.2.x` for your projects.
+
 ## Install
 
 ```sh
 # with NPM
-$ npm install crosis4furrets
+$ npm install crosis4furrets@1.2.x
 
 # with Yarn
-$ yarn add crosis4furrets
+$ yarn add crosis4furrets@1.2.x
 ```
 
 ## Usage
