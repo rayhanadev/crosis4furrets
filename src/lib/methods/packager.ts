@@ -155,7 +155,7 @@ export async function packageRemove(
 }
 
 /**
- * List all installed Nix packages in a remote Repl.
+ * List all installed Packages in a remote Repl.
  *
  * @param {boolean} [raw=false]
  * - whether to list protocol Package types or a string array.

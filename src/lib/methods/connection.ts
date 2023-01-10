@@ -13,32 +13,39 @@ import ReplById from '../../queries/ReplById.graphql';
  * Open a connection to a remote Repl instance. You must perform this before any
  * actions are taken via the Client.
  *
+ * @param {boolean} [firewalled]
+ * - open a firewalled connection to a Repl.
  * @example
  *     await client.connect();
  *
  */
-export async function connect(this: Crosis): Promise<void> {
+export async function connect(this: Crosis, firewalled = false): Promise<void> {
 	const { success } = await test(decodeURIComponent(this.token));
 	if (!success) throw new Error('UserError: Invalid token');
 
-	const { data } = await this.gql.query({
-		query: CurrentUser,
-	});
+	if (!this.user) {
+		const { data } = await this.gql.query({
+			query: CurrentUser,
+		});
 
-	if (data.currentUser === null) throw new Error('UserError: Invalid token.');
-	this.user = data.currentUser;
+		if (data.currentUser === null)
+			throw new Error('UserError: Invalid token.');
+		this.user = data.currentUser;
+	}
 
-	const {
-		data: { repl },
-	} = await this.gql.query({
-		query: ReplById,
-		variables: {
-			id: this.replId,
-		},
-	});
+	if (!this.repl) {
+		const {
+			data: { repl },
+		} = await this.gql.query({
+			query: ReplById,
+			variables: {
+				id: this.replId,
+			},
+		});
 
-	if (repl === null) throw new Error('UserError: Invalid repl.');
-	this.repl = repl;
+		if (repl === null) throw new Error('UserError: Invalid repl.');
+		this.repl = repl;
+	}
 
 	await new Promise<void>((res) => {
 		const context = null;

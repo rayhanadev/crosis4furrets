@@ -37,14 +37,6 @@ type FetchGovalMetadataFunc = (
 	options: Options,
 ) => Promise<FetchConnectionMetadataResult>;
 
-interface CrosisConfigOptions {
-	token: string;
-	replId: string;
-	ignore?: string;
-	streams?: Streams;
-	fetchGovalMetadata?: FetchGovalMetadataFunc;
-}
-
 interface User {
 	id: number;
 	username: string;
@@ -67,6 +59,16 @@ interface Repl {
 	language: string;
 	isPrivate: boolean;
 	lang: Language;
+}
+
+interface CrosisConfigOptions {
+	token: string;
+	replId: string;
+	ignore?: string;
+	streams?: Streams;
+	fetchGovalMetadata?: FetchGovalMetadataFunc;
+	user?: User;
+	repl?: Repl;
 }
 
 import { cmdTimeout, channel } from './methods/internals';
@@ -133,6 +135,10 @@ import { encode, govalMetadata } from './utils';
  * - the stderr stream for the client.
  * @param {FetchGovalMetadataFunc} [fetchGovalMetadata]
  * - a function to handle fetching goval metadata when connecting to a Repl.
+ * @param {Repl} [repl]
+ * - custom Repl metadata to use instead of making a GraphQL request.
+ * @param {User} [user]
+ * - custom User metadata to use instead of making a GraphQL request.
  * @example
  *     import Client from 'crosis4furrets';
  *     const client = new Client({
@@ -187,6 +193,17 @@ import { encode, govalMetadata } from './utils';
  *     	},
  *     });
  *
+ * @example
+ * import fs from 'node:fs';
+ *     import Client from 'crosis4furrets';
+ *
+ *     const client = new Client({
+ *     	token: process.env.REPLIT_TOKEN,
+ *     	replId: process.env.REPLIT_REPL_ID,
+ *     	user: { ... },
+ *      repl: { ... },
+ *     });
+ *
  */
 class CrosisClient {
 	public replId: string;
@@ -203,7 +220,15 @@ class CrosisClient {
 	protected token: string;
 
 	constructor(options: CrosisConfigOptions) {
-		const { token, replId, ignore, streams, fetchGovalMetadata } = options;
+		const {
+			token,
+			replId,
+			ignore,
+			streams,
+			fetchGovalMetadata,
+			repl,
+			user,
+		} = options;
 		if (!token) throw new Error('UserError: Missing token parameter.');
 		if (!replId) throw new Error('UserError: Missing replId parameter.');
 
@@ -221,6 +246,9 @@ class CrosisClient {
 				stderr: process.stderr,
 			};
 		}
+
+		if (repl) this.repl = repl;
+		if (user) this.user = user;
 
 		this.fetchGovalMetadata = fetchGovalMetadata || govalMetadata;
 

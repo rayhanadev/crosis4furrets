@@ -21,8 +21,8 @@ export interface Options {
  *
  */
 export const encode = (token: string): string => {
-	if (token === encodeURIComponent(token)) return token;
-	return encodeURIComponent(token);
+	if (token === decodeURIComponent(token)) return encodeURIComponent(token);
+	return token;
 };
 
 /**
