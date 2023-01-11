@@ -11,5 +11,6 @@
 		"^.+\\.(ts|tsx)$": "ts-jest",
 		"^.+\\.(m?js)$": "babel-jest"
 	},
-	"preset": "ts-jest/presets/js-with-babel"
+	"preset": "ts-jest/presets/js-with-babel",
+	"testTimeout": 30000
 }

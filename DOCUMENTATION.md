@@ -16,7 +16,7 @@ new Client(options)
     -   `token: string`: the token to use for authentication.
     -   `replId: string`: the replId to use for the client.
     -   `[ignore]: string`: a gitignore file to enfore when recursing a Repl's directory.
-    -   `[fetchGovalMetadata]: (signal, { replId, token }) => Promise<`: a low-level handler to replace crosis4furrets method of fetching Goval Metadata Tokens
+    -   `[fetchGovalMetadata]: (signal, { replId, token, firewalled }) => Promise<`: a low-level handler to replace crosis4furrets method of fetching Goval Metadata Tokens
     -   `[streams]`: the streams to use for the client.
         -   `[stdin]: fs.ReadStream`: the stdin stream for the client.
         -   `[stdout]: fs.WriteStream`: the stdout stream for the client.
@@ -36,7 +36,7 @@ const streams = {
   stderr: fs.createWriteStream('error.txt'),
 };
 
-const fetchGovalMetadata = (signal, { replId }) => {
+const fetchGovalMetadata = (signal, { token, replId, firewalled }) => {
   // Mint a Goval Metadata Token and return it.
   // You likely will not need to specify this
   // function and crosis4furrets built-in
@@ -67,6 +67,13 @@ actions are taken via the Client.
 
 ```js
 await client.connect();
+```
+
+If you want to connect to a repl in firewalled mode, you can pass `true` to the
+function.
+
+```js
+await client.connect(true);
 ```
 
 #### .persist()

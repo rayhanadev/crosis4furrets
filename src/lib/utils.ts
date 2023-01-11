@@ -7,6 +7,7 @@ import type { FetchConnectionMetadataResult } from '@replit/crosis';
 export interface Options {
 	token: string;
 	replId: string;
+	firewalled: boolean;
 }
 
 /**
@@ -42,16 +43,26 @@ export const encode = (token: string): string => {
  *
  *     console.log(metadata);
  *
+ * @example
+ *     const metadata = await govalMetadata(signal, {
+ *     	token: process.env.REPLIT_TOKEN,
+ *     	replId: process.env.REPLIT_REPL_ID,
+ *     	firewalled: true,
+ *     });
+ *
+ *     console.log(metadata);
+ *
  */
 export const govalMetadata = async (
 	signal: AbortSignal,
 	options: Options,
 ): Promise<FetchConnectionMetadataResult> => {
 	let res: Response;
+	const firewalled_str = options.firewalled ? 'firewalled' : '';
 
 	try {
 		res = await fetch(
-			`https://replit.com/data/repls/${options.replId}/get_connection_metadata`,
+			`https://${firewalled_str}replit.com/data/repls/${options.replId}/get_connection_metadata`,
 			{
 				signal,
 				method: 'POST',
@@ -59,7 +70,7 @@ export const govalMetadata = async (
 					'User-Agent': 'Mozilla/5.0',
 					'Content-Type': 'application/json',
 					'X-Requested-With': 'XMLHttpRequest',
-					Referrer: 'https://replit.com',
+					Referrer: `https://${firewalled_str}replit.com`,
 					Cookie: `connect.sid=${options.token};`,
 				},
 				body: JSON.stringify({}),
