@@ -18,6 +18,9 @@ import ReplById from '../../queries/ReplById.graphql';
  * @example
  *     await client.connect();
  *
+ * @example
+ *     await client.connect(true);
+ *
  */
 export async function connect(this: Crosis, firewalled = false): Promise<void> {
 	const { success } = await test(decodeURIComponent(this.token));
@@ -54,6 +57,7 @@ export async function connect(this: Crosis, firewalled = false): Promise<void> {
 			return await this.fetchGovalMetadata(signal, {
 				token: this.token,
 				replId: this.replId,
+				firewalled,
 			});
 		};
 
