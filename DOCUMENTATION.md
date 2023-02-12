@@ -78,8 +78,8 @@ await client.connect(true);
 
 #### .persist()
 
-Persist any file-changes on the remote Repl. Useful if you are interacting
-with a Repl with the intentional of keeping changes.
+Persist any file-changes on the remote repl. Useful if you are interacting
+with a repl with the intentional of keeping changes.
 
 ```js
 await client.persist();
