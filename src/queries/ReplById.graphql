@@ -7,12 +7,12 @@ query ReplById($id: String!) {
 			isPrivate
 			lang {
 				id
-        engine
+				engine
 				runner: canUseShellRunner
-        packager: supportsPackager3
-        git: supportsGit
-        debugger: hasDAP
-        fs: supportsMultiFiles
+				packager: supportsPackager3
+				git: supportsGit
+				debugger: hasDAP
+				fs: supportsMultiFiles
 			}
 		}
 	}

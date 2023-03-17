@@ -84,8 +84,8 @@ export async function connect(this: Crosis, firewalled = false): Promise<void> {
 }
 
 /**
- * Persist any file-changes on the remote Replit. Useful if you are interacting
- * with a Replit with the intentional of keeping changes.
+ * Persist any file-changes on the remote Repl. Useful if you are interacting
+ * with a Repl with the intentional of keeping changes.
  *
  * @example
  *     await client.persist();

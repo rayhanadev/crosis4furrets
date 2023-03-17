@@ -55,10 +55,7 @@ module.exports = [
 	{
 		input: 'dist/index.d.ts',
 		output: [{ file: 'dist/index.d.ts', format: 'es' }],
-		plugins: [
-			dts(),
-			del({ hook: 'buildEnd', targets: ['./dist/lib/'] }),
-		],
+		plugins: [dts(), del({ hook: 'buildEnd', targets: ['./dist/lib/'] })],
 		external: [
 			...builtinModules,
 			...Object.keys(dependencies),

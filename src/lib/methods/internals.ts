@@ -41,8 +41,10 @@ export async function cmdTimeout(
  * Helper method to manage the channels a Client opens. For an old list of
  * services reference: https://crosis.turbio.repl.co/services
  *
- * @param {string} name
+ * @param {string} service
  * - name of the service for the Client to open a channel for.
+ * @param {string} [name]
+ * - optional name for the service, useful when opening named services.
  * @access package
  * @example
  *     const fileChan = await client.channel('files');
@@ -50,19 +52,25 @@ export async function cmdTimeout(
  *     // for more information on channels.
  *
  */
-export async function channel(name: string): Promise<Channel> {
-	const stored = this.channels[name];
+export async function channel(
+	service: string,
+	name?: string,
+): Promise<Channel> {
+	const id = name || service;
+
+	const stored = this.channels[id];
+
 	if (stored) {
 		return stored;
 	} else {
 		const chan = await new Promise<Channel>((res, rej) => {
-			this.client.openChannel({ service: name }, ({ channel, error }) => {
+			this.client.openChannel({ service, name }, ({ channel, error }) => {
 				if (error) rej(error);
 				if (channel) res(channel);
 			});
 		});
 
-		this.channels[name] = chan;
+		this.channels[id] = chan;
 		return chan;
 	}
 }

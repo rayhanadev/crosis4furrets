@@ -32,8 +32,8 @@ const ignorefile = await fs.readFile('local.gitignore');
 
 const streams = {
   stdin: process.stdin,
-  stdout: fs.createWriteStream('output.txt'),
-  stderr: fs.createWriteStream('error.txt'),
+  stdout: fs.createWriteStream('output.txt', { flags: 'a' }),
+  stderr: fs.createWriteStream('error.txt', { flags: 'a' }),
 };
 
 const fetchGovalMetadata = (signal, { token, replId, firewalled }) => {
