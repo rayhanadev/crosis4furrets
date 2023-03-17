@@ -18,14 +18,18 @@ module.exports = [
 			{
 				file: `dist/index.cjs`,
 				format: 'cjs',
-				preferConst: true,
 				sourcemap: true,
+				generatedCode: {
+					constBindings: true,
+				},
 			},
 			{
 				file: `dist/index.mjs`,
 				format: 'esm',
-				preferConst: true,
 				sourcemap: true,
+				generatedCode: {
+					constBindings: true,
+				},
 			},
 		],
 		plugins: [
@@ -44,6 +48,8 @@ module.exports = [
 			...builtinModules,
 			...Object.keys(dependencies),
 			'node:buffer',
+			'node:fs',
+			'node:console',
 		],
 	},
 	{
@@ -51,13 +57,14 @@ module.exports = [
 		output: [{ file: 'dist/index.d.ts', format: 'es' }],
 		plugins: [
 			dts(),
-			del({ hook: 'buildEnd', targets: ['./dist/dts/', './dist/lib/'] }),
+			del({ hook: 'buildEnd', targets: ['./dist/lib/'] }),
 		],
 		external: [
 			...builtinModules,
 			...Object.keys(dependencies),
 			'node:buffer',
 			'node:fs',
+			'node:console',
 		],
 	},
 ];

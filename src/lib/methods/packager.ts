@@ -29,7 +29,7 @@ export async function packageInstall(
 	this: Crosis,
 	verbose = false,
 ): Promise<boolean> {
-	if (!this.repl.lang.packager3) return false;
+	if (!this.repl.lang.packager) return false;
 	const packager = await this.channel('packager3');
 
 	if (verbose) {
@@ -70,7 +70,7 @@ export async function packageAdd(
 	packages: string[],
 	verbose = false,
 ): Promise<boolean> {
-	if (!this.repl.lang.packager3) return false;
+	if (!this.repl.lang.packager) return false;
 	const packager = await this.channel('packager3');
 
 	if (verbose) {
@@ -123,7 +123,7 @@ export async function packageRemove(
 	packages: string[],
 	verbose = false,
 ): Promise<boolean> {
-	if (!this.repl.lang.packager3) return false;
+	if (!this.repl.lang.packager) return false;
 
 	const packager = await this.channel('packager3');
 
@@ -172,7 +172,7 @@ export async function packageList(
 	this: Crosis,
 	raw = false,
 ): Promise<PackageListContentType<typeof raw>[] | boolean> {
-	if (!this.repl.lang.packager3) return false;
+	if (!this.repl.lang.packager) return false;
 
 	const packager = await this.channel('packager3');
 
@@ -205,7 +205,7 @@ export async function packageSearch(
 	query: string,
 	raw = false,
 ): Promise<api.IPackage[] | string[] | boolean> {
-	if (!this.repl.lang.packager3) return false;
+	if (!this.repl.lang.packager) return false;
 
 	const packager = await this.channel('packager3');
 
@@ -233,7 +233,7 @@ export async function packageInfo(
 	this: Crosis,
 	name: string,
 ): Promise<api.IPackage | boolean> {
-	if (!this.repl.lang.packager3) return false;
+	if (!this.repl.lang.packager) return false;
 
 	const packager = await this.channel('packager3');
 

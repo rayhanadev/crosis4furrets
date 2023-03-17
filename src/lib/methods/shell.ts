@@ -17,7 +17,7 @@ export async function shellRun(this: Crosis): Promise<Console | boolean> {
 	if (!this.repl.lang.runner) return false;
 	const runChan = await this.channel('shellrun2');
 
-	const shellStream = new Console(this.streams.stdout, this.streams.stderr);
+	const shellStream = new Console({ stdout: this.streams.stdout, stderr: this.streams.stderr });
 
 	let lastLine = '';
 
@@ -71,7 +71,7 @@ export async function shellExec(
 	if (!this.repl.lang.runner) return false;
 	const runChan = await this.channel('shellrun2');
 
-	const shellStream = new Console(this.streams.stdout, this.streams.stderr);
+	const shellStream = new Console({ stdout: this.streams.stdout, stderr: this.streams.stderr });
 
 	let lastLine = '';
 
@@ -116,7 +116,7 @@ export async function shellStop(this: Crosis): Promise<Console | boolean> {
 	if (!this.repl.lang.runner) return false;
 	const runChan = await this.channel('shellrun2');
 
-	const shellStream = new Console(this.streams.stdout, this.streams.stderr);
+	const shellStream = new Console({ stdout: this.streams.stdout, stderr: this.streams.stderr });
 
 	let lastLine = '';
 

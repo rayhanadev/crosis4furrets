@@ -44,13 +44,12 @@ interface User {
 
 interface Language {
 	id: string;
-	runner: boolean;
-	packager3: boolean;
-	terminal: boolean;
-	interpreter: boolean;
 	engine: string;
-	mainFile: string | null;
-	supportsMultiFiles: boolean;
+	runner: boolean;
+	packager: boolean;
+	git: boolean;
+	debugger: boolean;
+	fs: boolean;
 }
 
 interface Repl {
