@@ -41,15 +41,21 @@ export async function shellRun(
 				content += cmd.output;
 
 				if (promptAppearance === 2) {
-					const cleaned = content
+					const trimmed = content
 						.trim()
+						.replace(/\x1b\[\d+m/g, '')
 						.split('\n')
 						.slice(1, -1)
 						.join('\n')
-						.split('\r')
+						.trim();
+
+					if(trimmed.length === 0) res('');
+						
+					const cleaned = trimmed.split('\r')
 						.slice(1)
-						.join('\r')
-						.replace(/\x1b\[\d+m/g, '');
+						.join('\r');
+
+					res(cleaned);
 
 					res(cleaned);
 				}
@@ -169,15 +175,19 @@ export async function shellExec(
 				content += cmd.output;
 
 				if (promptAppearance === 2) {
-					const cleaned = content
+					const trimmed = content
 						.trim()
+						.replace(/\x1b\[\d+m/g, '')
 						.split('\n')
 						.slice(1, -1)
 						.join('\n')
-						.split('\r')
+						.trim();
+
+					if(trimmed.length === 0) res('');
+						
+					const cleaned = trimmed.split('\r')
 						.slice(1)
-						.join('\r')
-						.replace(/\x1b\[\d+m/g, '');
+						.join('\r');
 
 					res(cleaned);
 				}
