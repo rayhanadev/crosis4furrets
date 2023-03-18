@@ -3,7 +3,7 @@ import { Console } from 'node:console';
 import type Crosis from '../crosis';
 
 const runPrompt = '';
-
+const shellPrompt = /~\/[\w\d-]+\$\s$/gm
 /**
  * Execute the current Run command in a remote Repl and return a Promise with
  * the contents after running the command.
@@ -31,18 +31,12 @@ export async function shellRun(
 			setTimeout(() => rej(new Error('Runner timed out.')), timeout);
 		}
 
-		let lastLine = '';
 		let content = '';
 		let promptAppearance = 0;
 
 		runChan.onCommand((cmd) => {
 			if (cmd.output) {
 				if (cmd.output.includes(runPrompt)) promptAppearance++;
-
-				if (lastLine.startsWith(cmd.output)) {
-					lastLine = lastLine.slice(cmd.output.length);
-					return;
-				}
 
 				content += cmd.output;
 
@@ -103,7 +97,6 @@ export async function shellRunStream(
 			setTimeout(() => rej(new Error('Runner timed out.')), timeout);
 		}
 
-		let lastLine = '';
 		let promptAppearance = 0;
 
 		runChan.onCommand((cmd) => {
@@ -112,11 +105,6 @@ export async function shellRunStream(
 
 				if (promptAppearance === 2) {
 					res(true);
-				}
-
-				if (lastLine.startsWith(cmd.output)) {
-					lastLine = lastLine.slice(cmd.output.length);
-					return;
 				}
 
 				this.streams.stdout.write(cmd.output);
@@ -128,7 +116,6 @@ export async function shellRunStream(
 		runChan.send({ clear: {} });
 		runChan.send({ runMain: {} });
 		this.streams.stdin.on('data', (input) => {
-			lastLine = input.toString() + '\r\r\n';
 			runChan.send({ input: input.toString() });
 			runChan.send({ input: '\r\n' });
 		});
@@ -165,26 +152,19 @@ export async function shellExec(
 			setTimeout(() => rej(new Error('Runner timed out.')), timeout);
 		}
 
-		let lastLine = '';
 		let content = '';
 		let promptAppearance = 0;
 
 		runChan.onCommand((cmd) => {
 			if (cmd.output) {
+				if (cmd.output === `${exec}\r\n`) return;
+				
 				const safePromptTest = cmd.output.replace(
 					/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/gm,
 					'',
 				);
-		
-				if (safePromptTest === `~/${this.repl.slug}$ `)
-					promptAppearance++;
 
-				if (cmd.output === `${exec}\r\n`) return;
-
-				if (lastLine.startsWith(cmd.output)) {
-					lastLine = lastLine.slice(cmd.output.length);
-					return;
-				}
+				if (shellPrompt.test(safePromptTest)) promptAppearance++;
 
 				content += cmd.output;
 
@@ -246,7 +226,6 @@ export async function shellExecStream(
 			setTimeout(() => rej(new Error('Runner timed out.')), timeout);
 		}
 
-		let lastLine = '';
 		let promptAppearance = 0;
 
 		runChan.onCommand((cmd) => {
@@ -256,16 +235,10 @@ export async function shellExecStream(
 					'',
 				);
 		
-				if (safePromptTest === `~/${this.repl.slug}$ `)
-					promptAppearance++;
+				if (shellPrompt.test(safePromptTest)) promptAppearance++;
 
 				if (promptAppearance === 2) {
 					res(true);
-				}
-
-				if (lastLine.startsWith(cmd.output)) {
-					lastLine = lastLine.slice(cmd.output.length);
-					return;
 				}
 
 				this.streams.stdout.write(cmd.output);
@@ -277,7 +250,6 @@ export async function shellExecStream(
 		runChan.send({ clear: {} });
 		runChan.send({ input: `${exec}\r` });
 		this.streams.stdin.on('data', (input) => {
-			lastLine = input.toString() + '\r\r\n';
 			runChan.send({ input: input.toString() });
 			runChan.send({ input: '\r\n' });
 		});
