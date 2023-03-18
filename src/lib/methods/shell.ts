@@ -3,7 +3,6 @@ import { Console } from 'node:console';
 import type Crosis from '../crosis';
 
 const runPrompt = '';
-const shellPrompt = '\x1B[?2004h\x1B[01;34m~/crosis4furrets-test\x1B[00m$';
 
 /**
  * Execute the current Run command in a remote Repl and return a Promise with
@@ -14,11 +13,10 @@ const shellPrompt = '\x1B[?2004h\x1B[01;34m~/crosis4furrets-test\x1B[00m$';
  * of time.
  * @example
  *     const data = await client.shellRun();
- *     console.log(data)
- *  
+ *     console.log(data);
+ *
  * @example
- *     await client.shellRun(10000)
- *         .catch((error) => console.error(error));
+ *     await client.shellRun(10000).catch((error) => console.error(error));
  *
  */
 export async function shellRun(
@@ -88,8 +86,9 @@ export async function shellRun(
  *     console.log(success);
  *
  * @example
- *     await client.shellRunStream(10000)
- *         .catch((error) => console.error(error));
+ *     await client
+ *     	.shellRunStream(10000)
+ *     	.catch((error) => console.error(error));
  *
  */
 export async function shellRunStream(
@@ -137,19 +136,20 @@ export async function shellRunStream(
 }
 
 /**
- * Execute a command in a remote Repl and return a Promise with
- * the contents after running the command.
+ * Execute a command in a remote Repl and return a Promise with the contents
+ * after running the command.
  *
  * @param {number} [timeout]
  * - optionally timeout the runner and reject the promise after a certain period
  * of time.
  * @example
  *     const data = await client.shellExec('ls -lha');
- *     console.log(data)
- *  
+ *     console.log(data);
+ *
  * @example
- *     const data = await client.shellExec('ls -lha', 10000)
- *         .catch((error) => console.error(error));
+ *     const data = await client
+ *     	.shellExec('ls -lha', 10000)
+ *     	.catch((error) => console.error(error));
  *
  */
 export async function shellExec(
@@ -171,7 +171,14 @@ export async function shellExec(
 
 		runChan.onCommand((cmd) => {
 			if (cmd.output) {
-				if (cmd.output.includes(shellPrompt)) promptAppearance++;
+				const safePromptTest = cmd.output.replace(
+					/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/gm,
+					'',
+				);
+		
+				if (safePromptTest === `~/${this.repl.slug}$ `)
+					promptAppearance++;
+
 				if (cmd.output === `${exec}\r\n`) return;
 
 				if (lastLine.startsWith(cmd.output)) {
@@ -207,8 +214,8 @@ export async function shellExec(
 }
 
 /**
- * Execute a command in a remote Repl and stream its contents
- * to/from the specified input/output/error streams.
+ * Execute a command in a remote Repl and stream its contents to/from the
+ * specified input/output/error streams.
  *
  * @param {number} [timeout]
  * - optionally timeout the runner and reject the promise after a certain period
@@ -218,11 +225,12 @@ export async function shellExec(
  *
  * @example
  *     const success = await client.shellExecStream('ls -lha');
- *     console.log(success)
+ *     console.log(success);
  *
  * @example
- *     await client.shellExecStream('ls -lha', 10000)
- *         .catch((error) => console.error(error));
+ *     await client
+ *     	.shellExecStream('ls -lha', 10000)
+ *     	.catch((error) => console.error(error));
  *
  */
 export async function shellExecStream(
@@ -243,7 +251,13 @@ export async function shellExecStream(
 
 		runChan.onCommand((cmd) => {
 			if (cmd.output) {
-				if (cmd.output.includes(shellPrompt)) promptAppearance++;
+				const safePromptTest = cmd.output.replace(
+					/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/gm,
+					'',
+				);
+		
+				if (safePromptTest === `~/${this.repl.slug}$ `)
+					promptAppearance++;
 
 				if (promptAppearance === 2) {
 					res(true);
