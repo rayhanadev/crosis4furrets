@@ -107,7 +107,13 @@ import {
 	nixChannels,
 	nixChannelLatest,
 } from './methods/nix';
-import { shellRun, shellExec, shellStop } from './methods/shell';
+import {
+	shellRun,
+	shellRunStream,
+	shellExec,
+	shellExecStream,
+	shellStop,
+} from './methods/shell';
 import { lspStart, lspMessage } from './methods/editor';
 
 import { encode, govalMetadata } from './utils';
@@ -126,11 +132,11 @@ import { encode, govalMetadata } from './utils';
  * - a gitignore file to enfore when recursing a Repl's directory.
  * @param {Streams} [options.streams]
  * - the streams to use for the client.
- * @param {string} [options.streams.stdin]
+ * @param {ReadStream} [options.streams.stdin]
  * - the stdin stream for the client.
- * @param {string} [options.streams.stdout]
+ * @param {WriteStream} [options.streams.stdout]
  * - the stdout stream for the client.
- * @param {string} [options.streams.stderr]
+ * @param {WriteStream} [options.streams.stderr]
  * - the stderr stream for the client.
  * @param {FetchGovalMetadataFunc} [fetchGovalMetadata]
  * - a function to handle fetching goval metadata when connecting to a Repl.
@@ -337,7 +343,11 @@ class CrosisClient {
 	// ts-ignore: intellisense
 	public shellRun: typeof shellRun;
 	// ts-ignore: intellisense
+	public shellRunStream: typeof shellRunStream;
+	// ts-ignore: intellisense
 	public shellExec: typeof shellExec;
+	// ts-ignore: intellisense
+	public shellExecStream: typeof shellExecStream;
 	// ts-ignore: intellisense
 	public shellStop: typeof shellStop;
 
@@ -386,7 +396,9 @@ CrosisClient.prototype.nixChannels = nixChannels;
 CrosisClient.prototype.nixChannelLatest = nixChannelLatest;
 
 CrosisClient.prototype.shellRun = shellRun;
+CrosisClient.prototype.shellRunStream = shellRunStream;
 CrosisClient.prototype.shellExec = shellExec;
+CrosisClient.prototype.shellExecStream = shellExecStream;
 CrosisClient.prototype.shellStop = shellStop;
 
 CrosisClient.prototype.lspStart = lspStart;

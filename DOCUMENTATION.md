@@ -464,36 +464,74 @@ const latestNixChannel = await client.nixChannelsLatest();
 console.log(latestNixChannels);
 ```
 
-### Runner (via ShellRun)
+### Runner
 
 #### .shellRun()
 
-Execute the current Run command in a remote Repl.
+Execute the current Run command in a remote Repl and return
+a Promise with the contents after running the command.
 
 ```js
-await client.shellRun();
+const data = await client.shellRun();
+console.log(data)
 ```
 
 ```js
-const replShell = await client.shellRun();
-replShell.log('[PROCESS]: Incoming data.');
+await client.shellRun(10000)
+  .catch((error) => console.error(error));
+```
+
+#### .shellRunStream()
+
+Execute the current Run command in a remote Repl and stream its contents
+to/from the specified input/output/error streams.
+
+```js
+await client.shellRunStream();
+```
+
+```js
+const success = await client.shellRunStream();
+console.log(success);
+```
+
+```js
+await client.shellRun(10000)
+  .catch((error) => console.error(error));
 ```
 
 #### .shellExec()
 
-Execute a shell command in a remote Repl.
+Execute a command in a remote Repl and return a Promise with
+the contents after running the command.
 
 ```js
-await client.shellExec('ls');
+const data = await client.shellExec('ls -lha');
+console.log(data)
 ```
 
 ```js
-await client.shellExec('ls', ['-a']);
+await client.shellExec('ls -lha', 10000)
+  .catch((error) => console.error(error));
+```
+
+#### .shellExecStream()
+
+Execute a command in a remote Repl and stream its contents
+to/from the specified input/output/error streams.
+
+```js
+await client.shellExecStream('ls -lha');
 ```
 
 ```js
-const replShell = await client.shellExec('ls');
-replShell.log('[PROCESS]: Incoming data.');
+const success = await client.shellExecStream('ls -lha');
+console.log(success);
+```
+
+```js
+await client.shellExecStream('ls -lha', 10000)
+  .catch((error) => console.error(error));
 ```
 
 #### .shellStop()

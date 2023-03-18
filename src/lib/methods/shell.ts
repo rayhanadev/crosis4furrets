@@ -2,109 +2,272 @@ import { Console } from 'node:console';
 
 import type Crosis from '../crosis';
 
+const runPrompt = '';
+const shellPrompt = '\x1B[?2004h\x1B[01;34m~/crosis4furrets-test\x1B[00m$';
+
 /**
- * Execute the current Run command in a remote Repl.
+ * Execute the current Run command in a remote Repl and return a Promise with
+ * the contents after running the command.
  *
+ * @param {number} [timeout]
+ * - optionally timeout the runner and reject the promise after a certain period
+ * of time.
  * @example
- *     await client.shellRun();
- *
+ *     const data = await client.shellRun();
+ *     console.log(data)
+ *  
  * @example
- *     const replShell = await client.shellRun();
- *     replShell.log('[PROCESS]: Incoming data.');
+ *     await client.shellRun(10000)
+ *         .catch((error) => console.error(error));
  *
  */
-export async function shellRun(this: Crosis): Promise<Console | boolean> {
+export async function shellRun(
+	this: Crosis,
+	timeout?: number,
+): Promise<string | boolean> {
 	if (!this.repl.lang.runner) return false;
 	const runChan = await this.channel('shellrun2');
 
-	const shellStream = new Console({
-		stdout: this.streams.stdout,
-		stderr: this.streams.stderr,
-	});
-
-	let lastLine = '';
-
-	runChan.onCommand((cmd) => {
-		if (cmd.output) {
-			if (lastLine.startsWith(cmd.output)) {
-				lastLine = lastLine.slice(cmd.output.length);
-				return;
-			}
-
-			this.streams.stdout.write(cmd.output);
+	return new Promise((res, rej) => {
+		if (timeout) {
+			setTimeout(() => rej(new Error('Runner timed out.')), timeout);
 		}
 
-		if (cmd.hint) this.streams.stdout.write('\nHint: ' + cmd.hint.text);
-	});
+		let lastLine = '';
+		let content = '';
+		let promptAppearance = 0;
 
-	runChan.send({ clear: {} });
-	runChan.send({ runMain: {} });
-	this.streams.stdin.on('data', (input) => {
-		lastLine = input.toString() + '\r\r\n';
-		runChan.send({ input: input.toString() });
-		runChan.send({ input: '\r\n' });
-	});
+		runChan.onCommand((cmd) => {
+			if (cmd.output) {
+				if (cmd.output.includes(runPrompt)) promptAppearance++;
 
-	return shellStream;
+				if (lastLine.startsWith(cmd.output)) {
+					lastLine = lastLine.slice(cmd.output.length);
+					return;
+				}
+
+				content += cmd.output;
+
+				if (promptAppearance === 2) {
+					const cleaned = content
+						.trim()
+						.split('\n')
+						.slice(1, -1)
+						.join('\n')
+						.split('\r')
+						.slice(1)
+						.join('\r')
+						.replace(/\x1b\[\d+m/g, '');
+
+					res(cleaned);
+				}
+			}
+
+			if (cmd.hint) {
+				content += `\nHint:  ${cmd.hint.text}`;
+			}
+		});
+
+		runChan.send({ clear: {} });
+		runChan.send({ runMain: {} });
+	});
 }
 
 /**
- * Execute a shell command in a remote Repl.
+ * Execute the current Run command in a remote Repl and stream its contents
+ * to/from the specified input/output/error streams.
  *
- * @param {string} cmd
- * - the command to run.
- * @param {string[]} args
- * - arguments to pass to the command.
+ * @param {number} [timeout]
+ * - optionally timeout the runner and reject the promise after a certain period
+ * of time.
  * @example
- *     await client.shellExec('ls');
- *
- * @example
- *     await client.shellExec('ls', ['-a']);
+ *     await client.shellRunStream();
  *
  * @example
- *     const replShell = await client.shellExec('ls');
- *     replShell.log('[PROCESS]: Incoming data.');
+ *     const success = await client.shellRunStream();
+ *     console.log(success);
+ *
+ * @example
+ *     await client.shellRunStream(10000)
+ *         .catch((error) => console.error(error));
+ *
+ */
+export async function shellRunStream(
+	this: Crosis,
+	timeout?: number,
+): Promise<boolean> {
+	if (!this.repl.lang.runner) return false;
+	const runChan = await this.channel('shellrun2');
+
+	return new Promise((res, rej) => {
+		if (timeout) {
+			setTimeout(() => rej(new Error('Runner timed out.')), timeout);
+		}
+
+		let lastLine = '';
+		let promptAppearance = 0;
+
+		runChan.onCommand((cmd) => {
+			if (cmd.output) {
+				if (cmd.output.includes(runPrompt)) promptAppearance++;
+
+				if (promptAppearance === 2) {
+					res(true);
+				}
+
+				if (lastLine.startsWith(cmd.output)) {
+					lastLine = lastLine.slice(cmd.output.length);
+					return;
+				}
+
+				this.streams.stdout.write(cmd.output);
+			}
+
+			if (cmd.hint) this.streams.stdout.write('\nHint: ' + cmd.hint.text);
+		});
+
+		runChan.send({ clear: {} });
+		runChan.send({ runMain: {} });
+		this.streams.stdin.on('data', (input) => {
+			lastLine = input.toString() + '\r\r\n';
+			runChan.send({ input: input.toString() });
+			runChan.send({ input: '\r\n' });
+		});
+	});
+}
+
+/**
+ * Execute a command in a remote Repl and return a Promise with
+ * the contents after running the command.
+ *
+ * @param {number} [timeout]
+ * - optionally timeout the runner and reject the promise after a certain period
+ * of time.
+ * @example
+ *     const data = await client.shellExec('ls -lha');
+ *     console.log(data)
+ *  
+ * @example
+ *     const data = await client.shellExec('ls -lha', 10000)
+ *         .catch((error) => console.error(error));
  *
  */
 export async function shellExec(
 	this: Crosis,
-	cmd: string,
-	args?: string[],
-): Promise<Console | boolean> {
+	exec: string,
+	timeout?: number,
+): Promise<string | boolean> {
 	if (!this.repl.lang.runner) return false;
-	const runChan = await this.channel('shellrun2');
+	const runChan = await this.channel('shell');
 
-	const shellStream = new Console({
-		stdout: this.streams.stdout,
-		stderr: this.streams.stderr,
-	});
-
-	let lastLine = '';
-
-	runChan.onCommand((cmd) => {
-		if (cmd.output) {
-			if (lastLine.startsWith(cmd.output)) {
-				lastLine = lastLine.slice(cmd.output.length);
-				return;
-			}
-
-			this.streams.stdout.write(cmd.output);
+	return new Promise((res, rej) => {
+		if (timeout) {
+			setTimeout(() => rej(new Error('Runner timed out.')), timeout);
 		}
 
-		if (cmd.hint) this.streams.stdout.write('\nHint: ' + cmd.hint.text);
+		let lastLine = '';
+		let content = '';
+		let promptAppearance = 0;
+
+		runChan.onCommand((cmd) => {
+			if (cmd.output) {
+				if (cmd.output.includes(shellPrompt)) promptAppearance++;
+				if (cmd.output === `${exec}\r\n`) return;
+
+				if (lastLine.startsWith(cmd.output)) {
+					lastLine = lastLine.slice(cmd.output.length);
+					return;
+				}
+
+				content += cmd.output;
+
+				if (promptAppearance === 2) {
+					const cleaned = content
+						.trim()
+						.split('\n')
+						.slice(1, -1)
+						.join('\n')
+						.split('\r')
+						.slice(1)
+						.join('\r')
+						.replace(/\x1b\[\d+m/g, '');
+
+					res(cleaned);
+				}
+			}
+
+			if (cmd.hint) {
+				content += `\nHint:  ${cmd.hint.text}`;
+			}
+		});
+
+		runChan.send({ clear: {} });
+		runChan.send({ input: `${exec}\r` });
 	});
+}
 
-	const exec = args ? `${cmd} ${args.join(' ')}` : cmd;
+/**
+ * Execute a command in a remote Repl and stream its contents
+ * to/from the specified input/output/error streams.
+ *
+ * @param {number} [timeout]
+ * - optionally timeout the runner and reject the promise after a certain period
+ * of time.
+ * @example
+ *     await client.shellExecStream('ls -lha');
+ *
+ * @example
+ *     const success = await client.shellExecStream('ls -lha');
+ *     console.log(success)
+ *
+ * @example
+ *     await client.shellExecStream('ls -lha', 10000)
+ *         .catch((error) => console.error(error));
+ *
+ */
+export async function shellExecStream(
+	this: Crosis,
+	exec: string,
+	timeout?: number,
+): Promise<boolean> {
+	if (!this.repl.lang.runner) return false;
+	const runChan = await this.channel('shell');
 
-	runChan.send({ clear: {} });
-	runChan.send({ input: exec });
-	this.streams.stdin.on('data', (input) => {
-		lastLine = input.toString() + '\r\r\n';
-		runChan.send({ input: input.toString() });
-		runChan.send({ input: '\r\n' });
+	return new Promise((res, rej) => {
+		if (timeout) {
+			setTimeout(() => rej(new Error('Runner timed out.')), timeout);
+		}
+
+		let lastLine = '';
+		let promptAppearance = 0;
+
+		runChan.onCommand((cmd) => {
+			if (cmd.output) {
+				if (cmd.output.includes(shellPrompt)) promptAppearance++;
+
+				if (promptAppearance === 2) {
+					res(true);
+				}
+
+				if (lastLine.startsWith(cmd.output)) {
+					lastLine = lastLine.slice(cmd.output.length);
+					return;
+				}
+
+				this.streams.stdout.write(cmd.output);
+			}
+
+			if (cmd.hint) this.streams.stdout.write('\nHint: ' + cmd.hint.text);
+		});
+
+		runChan.send({ clear: {} });
+		runChan.send({ input: `${exec}\r` });
+		this.streams.stdin.on('data', (input) => {
+			lastLine = input.toString() + '\r\r\n';
+			runChan.send({ input: input.toString() });
+			runChan.send({ input: '\r\n' });
+		});
 	});
-
-	return shellStream;
 }
 
 /**
