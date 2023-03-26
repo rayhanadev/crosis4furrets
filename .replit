@@ -1,4 +1,5 @@
-run = "yarn test"
+compile = "yarn build"
+run = "node tests/index.js"
 
 [nix]
 channel = "stable-22_11"

@@ -1,5 +1,9 @@
 ![](./.docs/banner.png)
 
+> :warning: This set of documentation may not be reflective of the current beta
+> version and some things may break. Documentation will be revamped upon release,
+> but for now reference your IDE's intellisense and JSDoc hints.
+
 # Documentation
 
 # Client

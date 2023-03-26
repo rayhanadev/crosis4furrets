@@ -53,8 +53,11 @@ export async function connect(this: Crosis, firewalled = false): Promise<void> {
 	await new Promise<void>((res) => {
 		const context = null;
 
+		this.client.setUnrecoverableErrorHandler(this.errorHandler);
+		// if(this.debugHandler) this.client.addDebugFunc(this.debugHandler);
+
 		const fetchConnectionMetadata = async (signal: AbortSignal) => {
-			return await this.fetchGovalMetadata(signal, {
+			return await this.metadataHandler(signal, {
 				token: this.token,
 				replId: this.replId,
 				firewalled,
@@ -76,10 +79,6 @@ export async function connect(this: Crosis, firewalled = false): Promise<void> {
 				res();
 			},
 		);
-
-		this.client.setUnrecoverableErrorHandler((error) => {
-			throw new Error(error.message);
-		});
 	});
 }
 
@@ -112,15 +111,33 @@ export async function persist(): Promise<boolean> {
  * and perform cleanups.
  *
  * @example
- *     client.close();
+ *     client.disconnect();
  *
  */
-export function close(): void {
+export function disconnect(): void {
 	if (this.connected === false) {
 		throw new Error(
 			'UserError: Cannot close connection because the client is not connected.',
 		);
 	}
 	this.client.close();
+	this.connected = false;
+}
+
+/**
+ * Destroy a connection to a remote Repl. In most cases this is the same as
+ * disconnecting and only needs to be used on larger-scale projects.
+ *
+ * @example
+ *     client.destroy();
+ *
+ */
+export function destroy(): void {
+	if (this.connected === false) {
+		throw new Error(
+			'UserError: Cannot close connection because the client is not connected.',
+		);
+	}
+	this.client.destroy();
 	this.connected = false;
 }

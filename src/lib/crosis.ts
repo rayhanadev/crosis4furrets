@@ -1,5 +1,5 @@
 import { Client } from '@replit/crosis';
-import type { Channel } from '@replit/crosis';
+import type { Channel, DebugLog } from '@replit/crosis';
 import type { FetchConnectionMetadataResult } from '@replit/crosis';
 
 import { GraphQL } from '@rayhanadev/replit-gql';
@@ -32,10 +32,14 @@ interface Streams {
 	stderr: ErrorStream;
 }
 
-type FetchGovalMetadataFunc = (
+type MetadataHandlerFunc = (
 	signal: AbortSignal,
 	options: Options,
 ) => Promise<FetchConnectionMetadataResult>;
+
+type ErrorHandlerFunc = (e: Error) => void;
+
+type DebugHandlerFunc = (log: DebugLog<unknown>) => void;
 
 interface User {
 	id: number;
@@ -65,13 +69,15 @@ interface CrosisConfigOptions {
 	replId: string;
 	ignore?: string;
 	streams?: Streams;
-	fetchGovalMetadata?: FetchGovalMetadataFunc;
+	metadataHandler?: MetadataHandlerFunc;
+	errorHandler?: ErrorHandlerFunc;
+	debugHandler?: DebugHandlerFunc;
 	user?: User;
 	repl?: Repl;
 }
 
 import { cmdTimeout, channel } from './methods/internals';
-import { connect, persist, close } from './methods/connection';
+import { connect, persist, disconnect, destroy } from './methods/connection';
 import {
 	dotEnv,
 	updateDotEnv,
@@ -108,12 +114,14 @@ import {
 	nixChannelLatest,
 } from './methods/nix';
 import {
-	shellRun,
-	shellRunStream,
-	shellExec,
-	shellExecStream,
-	shellStop,
-} from './methods/shell';
+	execRun,
+	execRunStream,
+	execInterp,
+	execInterpStream,
+	execShell,
+	execShellStream,
+	execStop,
+} from './methods/exec';
 import { lspStart, lspMessage } from './methods/editor';
 
 import { encode, govalMetadata } from './utils';
@@ -138,7 +146,11 @@ import { encode, govalMetadata } from './utils';
  * - the stdout stream for the client.
  * @param {WriteStream} [options.streams.stderr]
  * - the stderr stream for the client.
- * @param {FetchGovalMetadataFunc} [fetchGovalMetadata]
+ * @param {MetadataHandlerFunc} [metadataHandler]
+ * - a function to handle fetching goval metadata when connecting to a Repl.
+ * @param {ErrorHandlerFunc} [errorHandler]
+ * - a function to handle fetching goval metadata when connecting to a Repl.
+ * @param {DebugHandlerFunc} [debugHandler]
  * - a function to handle fetching goval metadata when connecting to a Repl.
  * @param {Repl} [repl]
  * - custom Repl metadata to use instead of making a GraphQL request.
@@ -191,7 +203,7 @@ import { encode, govalMetadata } from './utils';
  *     const client = new Client({
  *     	token: process.env.REPLIT_TOKEN,
  *     	replId: process.env.REPLIT_REPL_ID,
- *     	fetchGovalMetadata: (signal, { replId }) => {
+ *     	metadataHandler: (signal, { replId }) => {
  *     		// Mint a Repl's Goval Metadata Token
  *     		// somehow and return it.
  *     		return process.env.REPL_GOVAL_METADATA;
@@ -218,7 +230,9 @@ class CrosisClient {
 	public connected: boolean;
 	public persisting: boolean;
 	public streams: Streams;
-	public fetchGovalMetadata: FetchGovalMetadataFunc;
+	public metadataHandler: MetadataHandlerFunc;
+	public errorHandler: ErrorHandlerFunc;
+	public debugHandler: DebugHandlerFunc;
 	protected channels: Record<string, Channel>;
 	protected client: Client;
 	protected gql: TGraphQLClient;
@@ -230,7 +244,9 @@ class CrosisClient {
 			replId,
 			ignore,
 			streams,
-			fetchGovalMetadata,
+			metadataHandler,
+			errorHandler,
+			debugHandler,
 			repl,
 			user,
 		} = options;
@@ -255,7 +271,9 @@ class CrosisClient {
 		if (repl) this.repl = repl;
 		if (user) this.user = user;
 
-		this.fetchGovalMetadata = fetchGovalMetadata || govalMetadata;
+		this.metadataHandler = metadataHandler || govalMetadata;
+		this.errorHandler = errorHandler || ((error) => { throw new Error(error.message) });
+		this.debugHandler = debugHandler || null;
 
 		this.token = encode(token);
 		this.replId = replId;
@@ -280,7 +298,9 @@ class CrosisClient {
 	// ts-ignore: intellisense
 	public persist: typeof persist;
 	// ts-ignore: intellisense
-	public close: typeof close;
+	public disconnect: typeof disconnect;
+	// ts-ignore: intellisense
+	public destroy: typeof destroy;
 
 	// ts-ignore: intellisense
 	public dotEnv: typeof dotEnv;
@@ -341,15 +361,19 @@ class CrosisClient {
 	public nixChannelLatest: typeof nixChannelLatest;
 
 	// ts-ignore: intellisense
-	public shellRun: typeof shellRun;
+	public execRun: typeof execRun;
 	// ts-ignore: intellisense
-	public shellRunStream: typeof shellRunStream;
+	public execRunStream: typeof execRunStream;
 	// ts-ignore: intellisense
-	public shellExec: typeof shellExec;
+	public execInterp: typeof execInterp;
 	// ts-ignore: intellisense
-	public shellExecStream: typeof shellExecStream;
+	public execInterpStream: typeof execInterpStream;
 	// ts-ignore: intellisense
-	public shellStop: typeof shellStop;
+	public execShell: typeof execShell;
+	// ts-ignore: intellisense
+	public execShellStream: typeof execShellStream;
+	// ts-ignore: intellisense
+	public execStop: typeof execStop;
 
 	// ts-ignore: intellisense
 	public lspStart: typeof lspStart;
@@ -362,7 +386,8 @@ CrosisClient.prototype.channel = channel;
 
 CrosisClient.prototype.connect = connect;
 CrosisClient.prototype.persist = persist;
-CrosisClient.prototype.close = close;
+CrosisClient.prototype.disconnect = disconnect;
+CrosisClient.prototype.destroy = destroy;
 
 CrosisClient.prototype.dotEnv = dotEnv;
 CrosisClient.prototype.updateDotEnv = updateDotEnv;
@@ -395,11 +420,13 @@ CrosisClient.prototype.nixPackageSearch = nixPackageSearch;
 CrosisClient.prototype.nixChannels = nixChannels;
 CrosisClient.prototype.nixChannelLatest = nixChannelLatest;
 
-CrosisClient.prototype.shellRun = shellRun;
-CrosisClient.prototype.shellRunStream = shellRunStream;
-CrosisClient.prototype.shellExec = shellExec;
-CrosisClient.prototype.shellExecStream = shellExecStream;
-CrosisClient.prototype.shellStop = shellStop;
+CrosisClient.prototype.execRun = execRun;
+CrosisClient.prototype.execRunStream = execRunStream;
+CrosisClient.prototype.execInterp = execInterp;
+CrosisClient.prototype.execInterpStream = execInterpStream;
+CrosisClient.prototype.execShell = execShell;
+CrosisClient.prototype.execShellStream = execShellStream;
+CrosisClient.prototype.execStop = execStop;
 
 CrosisClient.prototype.lspStart = lspStart;
 CrosisClient.prototype.lspMessage = lspMessage;
